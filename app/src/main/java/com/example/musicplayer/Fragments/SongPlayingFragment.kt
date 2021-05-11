@@ -31,7 +31,7 @@ class SongPlayingFragment : Fragment(){
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.d("Chung toi la chien si ", activity?.supportFragmentManager?.getBackStackEntryCount().toString())
+
 
 
         mp = MediaPlayer.create(activity, R.raw.music)
@@ -91,14 +91,14 @@ class SongPlayingFragment : Fragment(){
             var currentPosition = msg.what
 
             // Update positionBar
-            if(positionBar!=null) positionBar.progress = currentPosition
+            positionBar?.progress = currentPosition
 
             // Update Labels
             var elapsedTime = createTimeLabel(currentPosition)
-            if(elapsedTimeLabel!=null)elapsedTimeLabel.text = elapsedTime
+            elapsedTimeLabel?.text = elapsedTime
 
             var remainingTime = createTimeLabel(totalTime - currentPosition)
-            if(remainingTimeLabel!=null)remainingTimeLabel.text = "-$remainingTime"
+            remainingTimeLabel?.text = "-$remainingTime"
         }
     }
     fun createTimeLabel(time: Int): String {

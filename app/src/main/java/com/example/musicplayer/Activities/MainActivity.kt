@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.Uri
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
@@ -23,10 +24,17 @@ import java.util.jar.Manifest
 class MainActivity : AppCompatActivity() {
     companion object {
         var song_list: ArrayList<Song> = ArrayList()
-        val REQUEST_CODE:Int=1;
+        const val REQUEST_CODE:Int=1;
         fun getAllMusic(context: Context): ArrayList<Song>{
-            var temp_music_list = ArrayList<Song>()
-            var uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+            var tempMusicList = ArrayList<Song>()
+            val uri =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    MediaStore.Audio.Media.getContentUri(
+                        MediaStore.VOLUME_EXTERNAL
+                    )
+                } else {
+                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+                }
             var projection = arrayOf(
                     MediaStore.Audio.Media.ALBUM,
                     MediaStore.Audio.Media.TITLE,
@@ -44,12 +52,15 @@ class MainActivity : AppCompatActivity() {
                     var path: String = cusor.getString(4)
                     var song: Song = Song(title, album, path, artists, duration)
 
-//                    Log.d("Path " + path, "name "+ title)
-                    temp_music_list.add(song)
+                    Log.d("Artists " + album, "name "+ title)
+                    tempMusicList.add(song)
                 }
                 cusor.close()
             }
-            return temp_music_list
+            else{
+            //    Log.d("AAAA", "YES'")
+            }
+            return tempMusicList
         }
     }
     private var mainScreenFragment : MainScreenFragment? = null
@@ -63,7 +74,6 @@ class MainActivity : AppCompatActivity() {
         if(ContextCompat.checkSelfPermission(applicationContext, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
             !=PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this@MainActivity, arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE), REQUEST_CODE)
-
         }
         else{
             Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show()
@@ -73,7 +83,7 @@ class MainActivity : AppCompatActivity() {
     }
     private fun initView(){
         mainScreenFragment = MainScreenFragment()
-        getSupportFragmentManager().beginTransaction()
+        supportFragmentManager.beginTransaction()
             .replace(R.id.main_id,mainScreenFragment!!).addToBackStack(null)
             .commit();
     }
@@ -88,7 +98,6 @@ class MainActivity : AppCompatActivity() {
             }
             else{
                 ActivityCompat.requestPermissions(this@MainActivity, arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE), REQUEST_CODE)
-
             }
         }
     }

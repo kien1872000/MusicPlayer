@@ -1,4 +1,4 @@
 package com.example.musicplayer.Models
 
-class Album {
+class Album(var name: String, var path: String) {
 }
