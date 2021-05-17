@@ -64,6 +64,12 @@ class PlayerActivity : AppCompatActivity() {
             }
         )
     }
+    private fun playThread(){
+        var playThread = Thread{
+            playBtnClick()
+        }
+        playThread.start()
+    }
     override fun onResume() {
         shuffleBtnClick()
         prevBtnClick()
@@ -232,7 +238,7 @@ class PlayerActivity : AppCompatActivity() {
         if(!isRepeat){
             position = (position+1)%musicItems.size
             if(isShuffle){
-                position = (position until musicItems.size-1).random()
+                position = (position until musicItems.size).random()
             }
         }
         uri = Uri.parse(musicItems[position].path)

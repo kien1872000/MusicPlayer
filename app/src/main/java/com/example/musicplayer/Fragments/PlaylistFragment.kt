@@ -1,60 +1,55 @@
 package com.example.musicplayer.Fragments
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.musicplayer.Activities.MainActivity
+import com.example.musicplayer.Adapters.AlbumAdapter
+import com.example.musicplayer.Adapters.PlaylistAdapter
+import com.example.musicplayer.Models.Album
 import com.example.musicplayer.R
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [PlaylistFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class PlaylistFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
+    companion object{
+        var playlist_list = ArrayList<Album>()
     }
+    private var playlistAdapter: PlaylistAdapter? = null
+    private var playlist_recyclerView: RecyclerView? = null
+
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_playlist, container, false)
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment PlaylistFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            PlaylistFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        playlist_recyclerView= view.findViewById(R.id.all_songs_playlist)
+        Log.d("TTTT", R.id.all_songs_playlist.toString())
+        playlist_recyclerView?.setHasFixedSize(true);
+        if(MainActivity.song_list.size>=1) {
+            setPlaylistList()
+            playlistAdapter = PlaylistAdapter(activity!!, playlist_list)
+            var layoutManager = GridLayoutManager(activity, 2)
+            playlist_recyclerView?.layoutManager = layoutManager
+            playlist_recyclerView?.adapter = playlistAdapter
+        }
     }
+    private fun setPlaylistList(){
+        playlist_list.clear()
+        playlist_list.add(Album("Playlist 1", ""))
+        playlist_list.add(Album("Playlist 2", ""))
+        playlist_list.add(Album("Playlist 3", ""))
+        playlist_list.add(Album("Playlist 4", ""))
+    }
+
 }

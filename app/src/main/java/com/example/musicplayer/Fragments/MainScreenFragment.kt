@@ -26,6 +26,7 @@ class MainScreenFragment : Fragment() {
     private var albumFragment : AlbumFragment? = null
     private var genresFragment :  GenresFragment? = null
     private var allSongFragment : AllSongFragment? = null
+    private var playListFragment: PlaylistFragment? = null
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -48,25 +49,31 @@ class MainScreenFragment : Fragment() {
                 0 -> showAlbumFragment()
                 1-> showGenresFragment()
                 2 -> showAllSongFragment()
-                else -> Toast.makeText(activity, "Nothing to show", Toast.LENGTH_LONG).show()
+                else -> showPlaylistFragment()
             }
         }
     }
     private fun showAlbumFragment(){
         albumFragment = AlbumFragment()
-        activity!!.getSupportFragmentManager().beginTransaction()
+        activity!!.supportFragmentManager.beginTransaction()
             .replace(R.id.main_id, albumFragment!!).addToBackStack(null)
+            .commit();
+    }
+    private fun showPlaylistFragment(){
+        playListFragment = PlaylistFragment()
+        activity!!.supportFragmentManager.beginTransaction()
+            .replace(R.id.main_id, playListFragment!!).addToBackStack(null)
             .commit();
     }
     private fun showGenresFragment(){
         genresFragment = GenresFragment()
-        activity!!.getSupportFragmentManager().beginTransaction()
+        activity!!.supportFragmentManager.beginTransaction()
             .replace(R.id.main_id, genresFragment!!).addToBackStack(null)
             .commit();
     }
     private fun showAllSongFragment(){
         allSongFragment = AllSongFragment()
-        activity!!.getSupportFragmentManager().beginTransaction()
+        activity!!.supportFragmentManager.beginTransaction()
             .replace(R.id.main_id,allSongFragment!!).addToBackStack(null)
             .commit();
     }

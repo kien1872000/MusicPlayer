@@ -25,8 +25,13 @@ class AlbumFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        var rootView = inflater.inflate(R.layout.fragment_all_song, container, false)
-        album_recyclerViews = rootView.findViewById(R.id.all_songs_listView)
+
+        return inflater.inflate(R.layout.fragment_album, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        album_recyclerViews = view.findViewById(R.id.all_songs_album)
         album_recyclerViews?.setHasFixedSize(true);
         if(MainActivity.song_list.size>=1){
             setAlbumList()
@@ -36,10 +41,9 @@ class AlbumFragment : Fragment() {
             album_recyclerViews?.adapter = albumAdapter
 
         }
-        // Inflate the layout for this fragment
-        return rootView
     }
     private fun setAlbumList(){
+        album_list.clear()
         for(musicItem in MainActivity.song_list){
             if(!(musicItem.album in album_name_list)) {
                 album_name_list.add(musicItem.album)

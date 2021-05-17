@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".Activities.PlaylistDetailActivity">
+    <ImageView
+        android:layout_marginTop="25dp"
+        android:id="@+id/playlist_image_detail"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:src="@drawable/song_image"
+        />
+    <TextView
+        android:id="@+id/playlist_name_detail"
+        android:text="Không có bài hát nào"
+        android:textSize="30dp"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="25dp"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:gravity="center"
+        android:background="#C5AEED">
+
+        <ImageView
+            android:id="@+id/playlist_shuffleButton"
+            android:layout_width="20dp"
+            android:layout_height="match_parent"
+            android:layout_marginRight="30dp"
+            android:src="@drawable/shuffle"
+            app:tint="@color/black"/>
+        <ImageView
+            android:id="@+id/playlist_prevButton"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/previous"
+             />
+        <ImageView
+            android:id="@+id/playlist_playButton"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:src="@drawable/play"
+            />
+
+        <ImageView
+            android:id="@+id/playlist_nextButton"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/next" />
+
+        <ImageView
+            android:id="@+id/playlist_repeatButton"
+            android:layout_width="19dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="30dp"
+            android:src="@drawable/refresh"
+            app:tint="@color/black" />
+        <ImageView
+            android:id="@+id/addButton"
+            android:layout_marginLeft="30dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/add"
+            />
+    </LinearLayout>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/playlist_songs_listView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</LinearLayout>

@@ -12,15 +12,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayer.Adapters.SongAdapter
 import com.example.musicplayer.Fragments.AlbumFragment
 import com.example.musicplayer.Models.Song
+import com.example.musicplayer.OnSongClick
 import com.example.musicplayer.R
 import kotlinx.android.synthetic.main.activity_album_detail.*
-import kotlinx.android.synthetic.main.activity_player.*
-import kotlinx.android.synthetic.main.activity_player.positionBar
-import kotlinx.android.synthetic.main.activity_player.song_image
-import kotlinx.android.synthetic.main.fragment_album.*
-import kotlinx.android.synthetic.main.fragment_all_song.*
-import kotlinx.android.synthetic.main.fragment_song_playing.*
-import kotlinx.android.synthetic.main.song.*
+
 
 class AlbumDetailActivity : AppCompatActivity() {
     private var songAdapter: SongAdapter? = null
