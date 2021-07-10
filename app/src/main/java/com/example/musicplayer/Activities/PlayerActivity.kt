@@ -1,24 +1,37 @@
 package com.example.musicplayer.Activities
 
 import android.annotation.SuppressLint
+import android.app.Notification
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.Color.BLACK
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
+import android.os.*
+import android.support.v4.media.session.MediaSessionCompat
 import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.os.Message
 import android.util.Log
 import android.widget.Button
 import android.widget.SeekBar
+import android.widget.Toast
+import androidx.core.app.NotificationCompat
 import androidx.core.os.postDelayed
+import com.example.musicplayer.ActionPlaying
+import com.example.musicplayer.ApplicationClass.Companion.ACTION_NEXT
+import com.example.musicplayer.ApplicationClass.Companion.ACTION_PLAY
+import com.example.musicplayer.ApplicationClass.Companion.ACTION_PREVIOUS
+import com.example.musicplayer.ApplicationClass.Companion.CHANNEL_ID_2
 import com.example.musicplayer.Fragments.AlbumFragment
 import com.example.musicplayer.Models.Song
+import com.example.musicplayer.MusicService
+import com.example.musicplayer.NotificationReceiver
 import com.example.musicplayer.R
 import kotlinx.android.synthetic.main.activity_player.*
 import kotlinx.android.synthetic.main.fragment_song_playing.*
@@ -30,8 +43,8 @@ import kotlinx.android.synthetic.main.fragment_song_playing.volumeBar
 import kotlinx.android.synthetic.main.song.*
 import kotlinx.android.synthetic.main.song.song_image
 
-class PlayerActivity : AppCompatActivity() {
-    private var mediaPlayer: MediaPlayer? = null
+class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
+    //private var mediaPlayer: MediaPlayer? = null
     private var uri: Uri? = null
     private var totalTime: Int = 0
     private var position: Int = -1
@@ -41,28 +54,30 @@ class PlayerActivity : AppCompatActivity() {
     private var isShuffle = false
     private var musicItems= ArrayList<Song>()
     private var category: String? = null
+    private var mediaSessionCompat: MediaSessionCompat? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_player)
+        mediaSessionCompat = MediaSessionCompat(baseContext, "My audio")
         getIntentMethod()
         onVolumeBarChange()
         onPositionBarChange()
-        this@PlayerActivity.runOnUiThread(
-            object : Runnable {
-                override fun run() {
-                    var currentPosition = mediaPlayer!!.currentPosition
-                    // Update positionBar
-                    positionBar?.progress = currentPosition
-                    // Update Labels
-                    var elapsedTime = createTimeLabel(currentPosition)
-                    elapsedTimeLabel?.text = elapsedTime
-
-                    var remainingTime = createTimeLabel(totalTime - currentPosition)
-                    remainingTimeLabel?.text = "-$remainingTime"
-                    handle.postDelayed(this, 1000)
-                }
-            }
-        )
+//        this@PlayerActivity.runOnUiThread(
+//            object : Runnable {
+//                override fun run() {
+//                    var currentPosition = musicService!!.getCurrentPosition()
+//                    // Update positionBar
+//                    positionBar?.progress = currentPosition
+//                    // Update Labels
+//                    var elapsedTime = createTimeLabel(currentPosition)
+//                    elapsedTimeLabel?.text = elapsedTime
+//
+//                    var remainingTime = createTimeLabel(totalTime - currentPosition)
+//                    remainingTimeLabel?.text = "-$remainingTime"
+//                    handle.postDelayed(this, 1000)
+//                }
+//            }
+//        )
     }
     private fun playThread(){
         var playThread = Thread{
@@ -71,6 +86,9 @@ class PlayerActivity : AppCompatActivity() {
         playThread.start()
     }
     override fun onResume() {
+
+        var intent = Intent(this, MusicService::class.java)
+        bindService(intent, this, Context.BIND_AUTO_CREATE)
         shuffleBtnClick()
         prevBtnClick()
         autoNext()
@@ -78,6 +96,11 @@ class PlayerActivity : AppCompatActivity() {
         playBtnClick()
         repeatBtnClick()
         super.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        unbindService(this)
     }
     private fun getIntentMethod(){
         if(!flag) {
@@ -88,33 +111,45 @@ class PlayerActivity : AppCompatActivity() {
         position = intent.getIntExtra("position", -1)
         category = intent.getStringExtra("category")
         if(category!=null&&category=="albumDetail"){
+            Log.d("12123", "yes")
             musicItems = AlbumDetailActivity.songs
         }
         else{
+            Log.d("4545", "yes")
             musicItems = MainActivity.song_list
         }
-        uri = Uri.parse(musicItems[position].path)
-        var image = getAlbumArt(uri.toString())
-        val bitmap = image?.size?.let { BitmapFactory.decodeByteArray(image, 0, it) }
-        if(bitmap!=null){
-            song_image.setImageBitmap(bitmap)
+        Log.d("144444", position.toString()+"=="+musicItems.size.toString())
+        if(position>=0) {
+            uri = Uri.parse(musicItems[position].path)
+            var image = getAlbumArt(uri.toString())
+            val bitmap = image?.size?.let { BitmapFactory.decodeByteArray(image, 0, it) }
+            if(bitmap!=null){
+                song_image.setImageBitmap(bitmap)
+            }
+            song_name_text.text = musicItems[position].name
+            singer_name_text.text = musicItems[position].artist
+            if(musicService!=null){
+                musicService!!.stop()
+                musicService!!.release()
+                //mediaPlayer = MediaPlayer.create(applicationContext, uri)
+                musicService!!.createMediaPlayer(position)
+                musicService!!.start()
+            }
         }
-        song_name_text.text = musicItems[position].name
-        singer_name_text.text = musicItems[position].artist
-        if(mediaPlayer!=null){
-            mediaPlayer!!.stop()
-            mediaPlayer!!.release()
-            mediaPlayer = MediaPlayer.create(applicationContext, uri)
-            mediaPlayer!!.start()
-        }
-        else{
-            mediaPlayer = MediaPlayer.create(applicationContext, uri)
-            mediaPlayer!!.start()
-        }
+//        else{
+//            //mediaPlayer = MediaPlayer.create(applicationContext, uri)
+//            musicService!!.createMediaPlayer(position)
+//            musicService
+//            musicService!!.start()
+//        }
+        showNotification(R.drawable.stop, R.drawable.ic_pause)
+        intent = Intent(this, MusicService::class.java)
+        intent.putExtra("servicePosition", position)
+        startService(intent)
        // mediaPlayer!!.isLooping = true
-        mediaPlayer!!.setVolume(0.5f, 0.5f)
-        totalTime = mediaPlayer!!.duration
-        positionBar.max = totalTime
+//        musicService!!.setVolume(0.5f, 0.5f)
+//        totalTime = musicService!!.getDuration()
+//        positionBar.max = totalTime
     }
     private fun onVolumeBarChange(){
         volumeBar.setOnSeekBarChangeListener(
@@ -122,7 +157,7 @@ class PlayerActivity : AppCompatActivity() {
                 override fun onProgressChanged(seekbar: SeekBar?, progress: Int, fromUser: Boolean) {
                     if (fromUser) {
                         var volumeNum = progress / 100.0f
-                        mediaPlayer!!.setVolume(volumeNum, volumeNum)
+                        musicService!!.setVolume(volumeNum, volumeNum)
                     }
                 }
                 override fun onStartTrackingTouch(p0: SeekBar?) {
@@ -138,7 +173,7 @@ class PlayerActivity : AppCompatActivity() {
             object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                     if (fromUser) {
-                        mediaPlayer!!.seekTo(progress)
+                        musicService!!.seekTo(progress)
                     }
                 }
                 override fun onStartTrackingTouch(p0: SeekBar?) {
@@ -148,18 +183,24 @@ class PlayerActivity : AppCompatActivity() {
             }
         )
     }
+
+    override fun playPause() {
+        if (musicService!!.isPlaying()) {
+            // Stop
+            musicService!!.pause()
+            playButton.setImageResource(R.drawable.play)
+            showNotification(R.drawable.play, R.drawable.ic_play)
+
+        } else {
+            // Start
+            musicService!!.start()
+            showNotification(R.drawable.stop, R.drawable.ic_pause)
+            playButton.setImageResource(R.drawable.stop)
+        }
+    }
     private fun playBtnClick() {
         playButton.setOnClickListener {
-            if (mediaPlayer!!.isPlaying) {
-                // Stop
-                mediaPlayer!!.pause()
-                playButton.setImageResource(R.drawable.play)
-
-            } else {
-                // Start
-                mediaPlayer!!.start()
-                playButton.setImageResource(R.drawable.stop)
-            }
+            playPause()
         }
     }
     private fun prevBtnClick(){
@@ -175,7 +216,9 @@ class PlayerActivity : AppCompatActivity() {
     private fun repeatBtnClick(){
         repeatButton.setOnClickListener{
             if(isRepeat){
-                repeatButton.setColorFilter(Color.BLACK)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
+                    repeatButton.setColorFilter(Color.BLACK)
+                }
                 isRepeat = false;
             }
             else{
@@ -197,12 +240,12 @@ class PlayerActivity : AppCompatActivity() {
         }
     }
     private fun autoNext(){
-        mediaPlayer!!.setOnCompletionListener {
+        musicService?.mediaPlayer?.setOnCompletionListener {
             playNext()
         }
     }
-    private fun playPrev(){
-        mediaPlayer!!.reset()
+    override fun playPrev(){
+        musicService!!.reset()
         if(!isRepeat){
             if(position>0) position--
             else{
@@ -223,18 +266,20 @@ class PlayerActivity : AppCompatActivity() {
         }
         song_name_text.text = musicItems[position].name
         singer_name_text.text = musicItems[position].artist
-        mediaPlayer = MediaPlayer.create(applicationContext, uri)
-        mediaPlayer!!.setVolume(volumeBar.progress/100f, volumeBar.progress/100f)
-        mediaPlayer!!.start()
-        totalTime = mediaPlayer!!.duration
+        //mediaPlayer = MediaPlayer.create(applicationContext, uri)
+        musicService!!.createMediaPlayer(position)
+        musicService!!.setVolume(volumeBar.progress/100f, volumeBar.progress/100f)
+        musicService!!.start()
+        totalTime = musicService!!.getDuration()
         positionBar.max = totalTime
         playButton.setImageResource(R.drawable.stop)
-        mediaPlayer?.setOnCompletionListener {
+        showNotification(R.drawable.stop, R.drawable.ic_pause)
+        musicService?.mediaPlayer?.setOnCompletionListener {
             playPrev()
         }
     }
-    private fun playNext(){
-        mediaPlayer!!.reset()
+    override fun playNext(){
+        musicService!!.reset()
         if(!isRepeat){
             position = (position+1)%musicItems.size
             if(isShuffle){
@@ -252,13 +297,15 @@ class PlayerActivity : AppCompatActivity() {
         }
         song_name_text.text = musicItems[position].name
         singer_name_text.text = musicItems[position].artist
-        mediaPlayer = MediaPlayer.create(applicationContext, uri)
-        mediaPlayer!!.setVolume(volumeBar.progress/100f, volumeBar.progress/100f)
-        mediaPlayer!!.start()
-        totalTime = mediaPlayer!!.duration
+        //mediaPlayer = MediaPlayer.create(applicationContext, uri)
+        musicService!!.createMediaPlayer(position)
+        musicService!!.setVolume(volumeBar.progress/100f, volumeBar.progress/100f)
+        musicService!!.start()
+        totalTime = musicService!!.getDuration()
         positionBar.max = totalTime
         playButton.setImageResource(R.drawable.stop)
-        mediaPlayer?.setOnCompletionListener {
+        showNotification(R.drawable.stop, R.drawable.ic_pause)
+        musicService?.mediaPlayer?.setOnCompletionListener {
             playNext()
         }
     }
@@ -279,5 +326,73 @@ class PlayerActivity : AppCompatActivity() {
         timeLabel += sec
 
         return timeLabel
+    }
+    private var musicService: MusicService? = null
+
+    override fun onServiceDisconnected(name: ComponentName?) {
+        musicService = null;
+    }
+
+    override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+        var myBinder: MusicService.MyBinder = service as MusicService.MyBinder
+        musicService = myBinder.getService()
+        musicService?.setCallBack(this)
+        Toast.makeText(this, "connected"+ musicService, Toast.LENGTH_LONG).show()
+        musicService!!.setVolume(0.5f, 0.5f)
+        totalTime = musicService!!.getDuration()
+        positionBar.max = totalTime
+        this@PlayerActivity.runOnUiThread(
+            object : Runnable {
+                override fun run() {
+                    var currentPosition = musicService!!.getCurrentPosition()
+                    // Update positionBar
+                    positionBar?.progress = currentPosition
+                    // Update Labels
+                    var elapsedTime = createTimeLabel(currentPosition)
+                    elapsedTimeLabel?.text = elapsedTime
+
+                    var remainingTime = createTimeLabel(totalTime - currentPosition)
+                    remainingTimeLabel?.text = "-$remainingTime"
+                    handle.postDelayed(this, 1000)
+                }
+            }
+        )
+        autoNext()
+    }
+    fun showNotification(playPauseBtn: Int, playNoti: Int){
+        var intent = Intent(this,PlayerActivity::class.java)
+        var contentIntent = PendingIntent.getActivity(this, 0,intent, 0)
+
+        var prevIntent = Intent(this, NotificationReceiver::class.java).setAction(ACTION_PREVIOUS)
+        var prevPending = PendingIntent.getBroadcast(this, 0,prevIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+        var pauseIntent = Intent(this, NotificationReceiver::class.java).setAction(ACTION_PLAY)
+        var pausePending = PendingIntent.getBroadcast(this, 0,pauseIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+        var nextIntent = Intent(this, NotificationReceiver::class.java).setAction(ACTION_NEXT)
+        var nextPending = PendingIntent.getBroadcast(this, 0,nextIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+        var image = getAlbumArt(Uri.parse(musicItems[position].path).toString())
+        val bitmap = image?.size?.let { BitmapFactory.decodeByteArray(image, 0, it) }
+        var nBuilder = NotificationCompat.Builder(this, CHANNEL_ID_2)
+        if(bitmap!=null){
+            nBuilder.setSmallIcon(playPauseBtn).setLargeIcon(bitmap)
+        }
+        else{
+            var bitmapNone = BitmapFactory.decodeResource(resources, R.drawable.song_image)
+            nBuilder.setSmallIcon(playPauseBtn).setLargeIcon(bitmapNone)
+        }
+
+        nBuilder.setContentTitle(musicItems.get(position).name).
+        setContentText(musicItems.get(position).artist).
+        setStyle(androidx.media.app.NotificationCompat.MediaStyle().setMediaSession(mediaSessionCompat!!.sessionToken)).
+        addAction(R.drawable.ic_prev, "Previous", prevPending).
+        addAction(playNoti, "Pause", pausePending).
+        addAction(R.drawable.ic_next, "Next", nextPending).
+        setPriority(NotificationCompat.PRIORITY_HIGH).
+        setAutoCancel(true).
+        setOnlyAlertOnce(true)
+        var notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(0, nBuilder.build())
     }
 }
