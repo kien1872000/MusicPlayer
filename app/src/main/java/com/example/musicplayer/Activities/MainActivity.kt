@@ -1,6 +1,7 @@
 package com.example.musicplayer.Activities
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.Uri
@@ -15,6 +16,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.musicplayer.Fragments.AllSongFragment
 import com.example.musicplayer.Fragments.MainScreenFragment
+import com.example.musicplayer.MiniPlayer
 import com.example.musicplayer.Models.Song
 import com.example.musicplayer.R
 import com.example.musicplayer.R.id
@@ -102,6 +104,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+//    override fun onResume() {
+//        super.onResume()
+//        var preferences: SharedPreferences =
+//        getSharedPreferences(MiniPlayer.LAST_PLAYED_SONG, Context.MODE_PRIVATE)
+//        var value = preferences.getString(MiniPlayer.MUSIC_FILE, null)
+//        Log.d("Hello mother fucker", value.toString())
+//        if(value!=null) {
+//            MiniPlayer.IS_SHOW_MINI_PLAYER = true;
+//            MiniPlayer.PATH_TO_FRAG = value.toString();
+//        }
+//        else {
+//            MiniPlayer.IS_SHOW_MINI_PLAYER = false;
+//            MiniPlayer.PATH_TO_FRAG = null;
+//        }
+//    }
 
 
 }

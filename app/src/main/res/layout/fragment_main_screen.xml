@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="horizontal">
 
     <ListView
         android:id="@+id/listView"
@@ -13,16 +13,51 @@
     <TextView
         android:id="@+id/recent_text"
         android:layout_marginLeft="20dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginBottom="-34dp"
         android:textStyle="bold"
         android:text="Recent"
         android:textSize="30dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+
+        android:layout_alignBottom="@+id/listView"/>
        />
     <GridView
         android:id="@+id/recent_list"
         android:layout_width="50dp"
         android:layout_height="50dp"
+        android:layout_alignBottom="@id/recent_text"
+        android:layout_marginBottom="-34dp"
         />
-</LinearLayout>
+    <TextView
+        android:id="@+id/listen_a_lot_list"
+        android:layout_marginLeft="20dp"
+        android:layout_marginBottom="-34dp"
+        android:textStyle="bold"
+        android:text="Listen a lot"
+        android:textSize="30dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/recent_list"
+
+        />
+    <GridView
+        android:id="@+id/_list"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignBottom="@+id/listen_a_lot_list"
+        android:layout_marginBottom="-34dp"
+        />
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:id="@+id/fragment_bottom_player">
+        <fragment
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:layout="@layout/fragment_mini_player"
+            android:name="com.example.musicplayer.Fragments.MiniPlayerFragment"/>
+    </FrameLayout>
+
+</RelativeLayout>

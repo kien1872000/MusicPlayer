@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Fragments.MiniPlayerFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/mini_player"
+        android:background="@color/white"
+        android:padding="5dp"
+        android:text="@string/hello_blank_fragment" >
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/song_image"
+            android:id="@+id/mini_player_image"
+            android:scaleType="centerCrop"
+            />
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:id="@+id/mini_player_next_btn"
+            android:src="@drawable/next"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="10dp"/>
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:id="@+id/mini_player_play_btn"
+            android:src="@drawable/play"
+            android:layout_toStartOf="@id/mini_player_next_btn"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="15dp"/>
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:id="@+id/mini_player_prev_btn"
+            android:src="@drawable/previous"
+            android:layout_toStartOf="@id/mini_player_play_btn"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="15dp"/>
+        <TextView
+            android:layout_toEndOf="@id/mini_player_image"
+            android:layout_marginStart="20dp"
+            android:textSize="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Song name is here"
+            android:maxLines="1"
+            android:id="@+id/mini_player_song_name"/>
+
+        <TextView
+            android:id="@+id/mini_player_song_artist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/mini_player_song_name"
+            android:layout_marginStart="48dp"
+            android:layout_marginBottom="-23dp"
+            android:layout_toEndOf="@id/mini_player_image"
+            android:text="Artist is here" />
+
+    </RelativeLayout>
+
+</FrameLayout>

@@ -1,7 +1,9 @@
 package com.example.musicplayer
 
 import android.app.Service
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Binder
@@ -59,7 +61,15 @@ class MusicService : Service() {
         else Log.d("11111", "yes")
         return START_STICKY
     }
-
+    fun clickNext() {
+        actionPlaying?.playNext()
+    }
+    fun clickPrev() {
+        actionPlaying?.playPrev()
+    }
+    fun clickPlay() {
+        actionPlaying?.playPause()
+    }
     private fun playMedia(startPosition: Int) {
         musicFiles = MainActivity.song_list
         position = startPosition
@@ -112,9 +122,21 @@ class MusicService : Service() {
         mediaPlayer!!.seekTo(position)
     }
     fun createMediaPlayer(position: Int){
-        uri = Uri.parse(musicFiles.get(position).path)
+        uri = Uri.parse(musicFiles[position].path)
+        MiniPlayer.PLAY_PAUSE = "Play"
+        var editor: SharedPreferences.Editor? = getSharedPreferences(MiniPlayer.LAST_PLAYED_SONG, Context.MODE_PRIVATE).edit()
+        editor?.putString(MiniPlayer.MUSIC_FILE, uri.toString())
+        editor?.putString(MiniPlayer.SONG_NAME, musicFiles[position].name)
+        editor?.putString(MiniPlayer.SONG_ARTIST, musicFiles[position].artist)
+        editor?.putBoolean(MiniPlayer.START_PLAYER_ACTIVITY, true)
+        editor?.apply();
         mediaPlayer = MediaPlayer.create(baseContext, uri)
     }
+    fun createMediaPlayerWithPath(path: String) {
+        var uriPath = Uri.parse(path)
+        mediaPlayer = MediaPlayer.create(baseContext, uriPath)
+    }
+
     fun setCallBack(actionPlaying: ActionPlaying){
         this.actionPlaying = actionPlaying
     }

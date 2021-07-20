@@ -1,5 +1,7 @@
 package com.example.musicplayer.Fragments
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -8,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.Toast
 import com.example.musicplayer.Adapters.CategoryAdapter
+import com.example.musicplayer.MiniPlayer
 import com.example.musicplayer.Models.Category
 import com.example.musicplayer.R
 import kotlinx.android.synthetic.main.fragment_main_screen.*
@@ -52,6 +55,7 @@ class MainScreenFragment : Fragment() {
                 else -> showPlaylistFragment()
             }
         }
+
     }
     private fun showAlbumFragment(){
         albumFragment = AlbumFragment()
@@ -78,4 +82,25 @@ class MainScreenFragment : Fragment() {
             .commit();
     }
 
+    override fun onResume() {
+        super.onResume()
+        var preferences: SharedPreferences = activity!!.
+        getSharedPreferences(MiniPlayer.LAST_PLAYED_SONG, Context.MODE_PRIVATE)
+        val path = preferences.getString(MiniPlayer.MUSIC_FILE, null)
+        val songName = preferences.getString(MiniPlayer.SONG_NAME, null)
+        val songArtist = preferences.getString(MiniPlayer.SONG_ARTIST, null)
+        if(path!=null) {
+            MiniPlayer.IS_SHOW_MINI_PLAYER = true
+            MiniPlayer.PATH_TO_FRAG = path
+            MiniPlayer.SONG_ARTIST_TO_FRAG =  songArtist
+            MiniPlayer.SONG_NAME_TO_FRAG = songName
+            MiniPlayer.SONG_ARTIST_TO_FRAG = songArtist
+        }
+        else{
+            MiniPlayer.IS_SHOW_MINI_PLAYER = false;
+            MiniPlayer.PATH_TO_FRAG = null;
+            MiniPlayer.SONG_ARTIST_TO_FRAG = null
+            MiniPlayer.SONG_NAME_TO_FRAG = null
+        }
+    }
 }

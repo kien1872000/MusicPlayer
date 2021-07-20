@@ -4,10 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
+import android.content.*
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.Color.BLACK
@@ -23,16 +20,13 @@ import android.widget.SeekBar
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.os.postDelayed
-import com.example.musicplayer.ActionPlaying
+import com.example.musicplayer.*
 import com.example.musicplayer.ApplicationClass.Companion.ACTION_NEXT
 import com.example.musicplayer.ApplicationClass.Companion.ACTION_PLAY
 import com.example.musicplayer.ApplicationClass.Companion.ACTION_PREVIOUS
 import com.example.musicplayer.ApplicationClass.Companion.CHANNEL_ID_2
 import com.example.musicplayer.Fragments.AlbumFragment
 import com.example.musicplayer.Models.Song
-import com.example.musicplayer.MusicService
-import com.example.musicplayer.NotificationReceiver
-import com.example.musicplayer.R
 import kotlinx.android.synthetic.main.activity_player.*
 import kotlinx.android.synthetic.main.fragment_song_playing.*
 import kotlinx.android.synthetic.main.fragment_song_playing.elapsedTimeLabel
@@ -101,6 +95,9 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     override fun onPause() {
         super.onPause()
         unbindService(this)
+        var editor: SharedPreferences.Editor? = getSharedPreferences(MiniPlayer.LAST_PLAYED_SONG, Context.MODE_PRIVATE).edit()
+        editor?.putBoolean(MiniPlayer.START_PLAYER_ACTIVITY, false)
+        editor?.apply();
     }
     private fun getIntentMethod(){
         if(!flag) {
@@ -111,14 +108,11 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         position = intent.getIntExtra("position", -1)
         category = intent.getStringExtra("category")
         if(category!=null&&category=="albumDetail"){
-            Log.d("12123", "yes")
             musicItems = AlbumDetailActivity.songs
         }
         else{
-            Log.d("4545", "yes")
             musicItems = MainActivity.song_list
         }
-        Log.d("144444", position.toString()+"=="+musicItems.size.toString())
         if(position>=0) {
             uri = Uri.parse(musicItems[position].path)
             var image = getAlbumArt(uri.toString())
@@ -190,13 +184,17 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
             musicService!!.pause()
             playButton.setImageResource(R.drawable.play)
             showNotification(R.drawable.play, R.drawable.ic_play)
-
+            MiniPlayer.PLAY_PAUSE = "Pause"
         } else {
             // Start
             musicService!!.start()
             showNotification(R.drawable.stop, R.drawable.ic_pause)
             playButton.setImageResource(R.drawable.stop)
+            MiniPlayer.PLAY_PAUSE = "Play"
         }
+        MiniPlayer.PATH_TO_FRAG = musicItems[position].path;
+        MiniPlayer.SONG_NAME_TO_FRAG = musicItems[position].name;
+        MiniPlayer.SONG_ARTIST_TO_FRAG = musicItems[position].artist;
     }
     private fun playBtnClick() {
         playButton.setOnClickListener {
@@ -277,6 +275,9 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         musicService?.mediaPlayer?.setOnCompletionListener {
             playPrev()
         }
+        MiniPlayer.PATH_TO_FRAG = musicItems[position].path;
+        MiniPlayer.SONG_NAME_TO_FRAG = musicItems[position].name;
+        MiniPlayer.SONG_ARTIST_TO_FRAG = musicItems[position].artist;
     }
     override fun playNext(){
         musicService!!.reset()
@@ -308,6 +309,9 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         musicService?.mediaPlayer?.setOnCompletionListener {
             playNext()
         }
+        MiniPlayer.PATH_TO_FRAG = musicItems[position].path;
+        MiniPlayer.SONG_NAME_TO_FRAG = musicItems[position].name;
+        MiniPlayer.SONG_ARTIST_TO_FRAG = musicItems[position].artist;
     }
     private fun getAlbumArt(uri: String): ByteArray? {
         val retriever = MediaMetadataRetriever()
@@ -331,6 +335,9 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
 
     override fun onServiceDisconnected(name: ComponentName?) {
         musicService = null;
+        Log.d("12123", "yes")
+        //topService();
+
     }
 
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -390,8 +397,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         addAction(playNoti, "Pause", pausePending).
         addAction(R.drawable.ic_next, "Next", nextPending).
         setPriority(NotificationCompat.PRIORITY_HIGH).
-        setAutoCancel(true).
-        setOnlyAlertOnce(true)
+        setAutoCancel(true)
         var notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(0, nBuilder.build())
     }
