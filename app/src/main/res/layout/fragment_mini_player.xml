@@ -50,8 +50,11 @@
             android:textSize="20dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginRight="20dp"
             android:text="Song name is here"
+            android:layout_toStartOf="@+id/mini_player_prev_btn"
             android:maxLines="1"
+            android:ellipsize="end"
             android:id="@+id/mini_player_song_name"/>
 
         <TextView
@@ -62,6 +65,10 @@
             android:layout_marginStart="48dp"
             android:layout_marginBottom="-23dp"
             android:layout_toEndOf="@id/mini_player_image"
+            android:layout_toStartOf="@+id/mini_player_prev_btn"
+            android:layout_marginRight="20dp"
+            android:maxLines="1"
+            android:ellipsize="end"
             android:text="Artist is here" />
 
     </RelativeLayout>

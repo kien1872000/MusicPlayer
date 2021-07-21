@@ -11,6 +11,7 @@ import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 import com.example.musicplayer.Activities.MainActivity
+import com.example.musicplayer.Activities.PlaylistDetailActivity
 import com.example.musicplayer.Models.Song
 
 class MusicService : Service() {
@@ -18,6 +19,8 @@ class MusicService : Service() {
     var mediaPlayer: MediaPlayer? =null
     var position: Int = -1;
     var actionPlaying: ActionPlaying? =null
+    var onMiniPlayerChangeListener: OnMiniPlayerChangeListener? = null;
+    var onPlaylistDetailClickListener: OnPlaylistDetailClickListener? = null;
     inner class MyBinder : Binder() {
         fun getService() : MusicService? {
             return this@MusicService
@@ -40,6 +43,7 @@ class MusicService : Service() {
         var actionName = intent?.getStringExtra("ActionName")
         if(intent!=null)  myPosition = intent.getIntExtra("servicePosition", -1)
         if(myPosition!=-1){
+            Log.d("v111", myPosition.toString())
             playMedia(myPosition)
         }
         if(actionName!=null) {
@@ -47,18 +51,23 @@ class MusicService : Service() {
                 "playPause"-> {
                     Toast.makeText(this, "PlayPause", Toast.LENGTH_LONG).show()
                     actionPlaying?.playPause()
+                    onMiniPlayerChangeListener?.playPause()
+                    onPlaylistDetailClickListener?.playPause()
                 }
                 "next"-> {
                     Toast.makeText(this, "Next", Toast.LENGTH_LONG).show()
                     actionPlaying?.playNext()
+                    onMiniPlayerChangeListener?.playNext()
+                    onPlaylistDetailClickListener?.playNext()
                 }
                 "previous"-> {
                     Toast.makeText(this, "Previous", Toast.LENGTH_LONG).show()
                     actionPlaying?.playPrev()
+                    onMiniPlayerChangeListener?.playPrev()
+                    onPlaylistDetailClickListener?.playPrev()
                 }
             }
         }
-        else Log.d("11111", "yes")
         return START_STICKY
     }
     fun clickNext() {
@@ -71,7 +80,7 @@ class MusicService : Service() {
         actionPlaying?.playPause()
     }
     private fun playMedia(startPosition: Int) {
-        musicFiles = MainActivity.song_list
+        musicFiles = PlaylistDetailActivity.playlist_songs
         position = startPosition
         if(mediaPlayer!=null){
             mediaPlayer!!.stop()
@@ -140,5 +149,10 @@ class MusicService : Service() {
     fun setCallBack(actionPlaying: ActionPlaying){
         this.actionPlaying = actionPlaying
     }
-
+    fun setOtherCallBack(onMiniPlayerChangeListener: OnMiniPlayerChangeListener?){
+        this.onMiniPlayerChangeListener= onMiniPlayerChangeListener
+    }
+    fun setOnPlaylistDetailClick(onPlaylistDetailClickListener: OnPlaylistDetailClickListener?) {
+        this.onPlaylistDetailClickListener = onPlaylistDetailClickListener
+    }
 }

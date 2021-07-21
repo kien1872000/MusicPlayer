@@ -1,27 +1,23 @@
 package com.example.musicplayer.Activities
 
+import android.app.NotificationManager
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.database.Cursor
-import android.net.Uri
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
-import androidx.appcompat.app.ActionBar
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.example.musicplayer.Fragments.AllSongFragment
 import com.example.musicplayer.Fragments.MainScreenFragment
 import com.example.musicplayer.MiniPlayer
 import com.example.musicplayer.Models.Song
 import com.example.musicplayer.R
-import com.example.musicplayer.R.id
-import com.example.musicplayer.R.id.*
-import java.util.jar.Manifest
+
 
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -86,7 +82,7 @@ class MainActivity : AppCompatActivity() {
     private fun initView(){
         mainScreenFragment = MainScreenFragment()
         supportFragmentManager.beginTransaction()
-            .replace(R.id.main_id,mainScreenFragment!!).addToBackStack(null)
+            .replace(R.id.main_id,mainScreenFragment!!)
             .commit();
     }
 
@@ -104,6 +100,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d("Hello mother fucker", "ff")
+        var editor: SharedPreferences.Editor? = getSharedPreferences(MiniPlayer.LAST_PLAYED_SONG, Context.MODE_PRIVATE).edit()
+        editor?.putBoolean(MiniPlayer.START_PLAYER_ACTIVITY, false)
+        editor?.apply();
+        val notifyManager: NotificationManager =
+            applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notifyManager.cancelAll()
+    }
 //    override fun onResume() {
 //        super.onResume()
 //        var preferences: SharedPreferences =

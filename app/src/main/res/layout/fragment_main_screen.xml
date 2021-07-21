@@ -48,16 +48,21 @@
         android:layout_alignBottom="@+id/listen_a_lot_list"
         android:layout_marginBottom="-34dp"
         />
+<!--    <FrameLayout-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_alignParentBottom="true"-->
+<!--        android:id="@+id/fragment_bottom_player">-->
+<!--        <fragment-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            tools:layout="@layout/fragment_mini_player"-->
+<!--            android:name="com.example.musicplayer.Fragments.MiniPlayerFragment"/>-->
+<!--    </FrameLayout>-->
     <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:id="@+id/fragment_bottom_player">
-        <fragment
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:layout="@layout/fragment_mini_player"
-            android:name="com.example.musicplayer.Fragments.MiniPlayerFragment"/>
-    </FrameLayout>
+        android:id="@+id/fragment_bottom_player_main_screen"/>
 
 </RelativeLayout>

@@ -49,6 +49,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     private var musicItems= ArrayList<Song>()
     private var category: String? = null
     private var mediaSessionCompat: MediaSessionCompat? = null
+    private var musicService: MusicService? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_player)
@@ -56,6 +57,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         getIntentMethod()
         onVolumeBarChange()
         onPositionBarChange()
+
 //        this@PlayerActivity.runOnUiThread(
 //            object : Runnable {
 //                override fun run() {
@@ -95,9 +97,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     override fun onPause() {
         super.onPause()
         unbindService(this)
-        var editor: SharedPreferences.Editor? = getSharedPreferences(MiniPlayer.LAST_PLAYED_SONG, Context.MODE_PRIVATE).edit()
-        editor?.putBoolean(MiniPlayer.START_PLAYER_ACTIVITY, false)
-        editor?.apply();
     }
     private fun getIntentMethod(){
         if(!flag) {
@@ -331,7 +330,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
 
         return timeLabel
     }
-    private var musicService: MusicService? = null
+
 
     override fun onServiceDisconnected(name: ComponentName?) {
         musicService = null;

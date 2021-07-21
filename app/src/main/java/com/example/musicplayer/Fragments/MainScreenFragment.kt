@@ -3,6 +3,7 @@ package com.example.musicplayer.Fragments
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -30,6 +31,9 @@ class MainScreenFragment : Fragment() {
     private var genresFragment :  GenresFragment? = null
     private var allSongFragment : AllSongFragment? = null
     private var playListFragment: PlaylistFragment? = null
+    private var miniPlayer: MiniPlayerFragment? = null
+    private var isStart = false;
+    private var isFirst = true;
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -56,6 +60,7 @@ class MainScreenFragment : Fragment() {
             }
         }
 
+
     }
     private fun showAlbumFragment(){
         albumFragment = AlbumFragment()
@@ -81,6 +86,12 @@ class MainScreenFragment : Fragment() {
             .replace(R.id.main_id,allSongFragment!!).addToBackStack(null)
             .commit();
     }
+    private fun showMiniPlayer(){
+        miniPlayer = MiniPlayerFragment()
+        activity!!.supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_bottom_player_main_screen, miniPlayer!!)
+            .commit()
+    }
 
     override fun onResume() {
         super.onResume()
@@ -89,6 +100,10 @@ class MainScreenFragment : Fragment() {
         val path = preferences.getString(MiniPlayer.MUSIC_FILE, null)
         val songName = preferences.getString(MiniPlayer.SONG_NAME, null)
         val songArtist = preferences.getString(MiniPlayer.SONG_ARTIST, null)
+        isStart = preferences.getBoolean(MiniPlayer.START_PLAYER_ACTIVITY, false);
+        if(isStart) {
+            showMiniPlayer()
+        }
         if(path!=null) {
             MiniPlayer.IS_SHOW_MINI_PLAYER = true
             MiniPlayer.PATH_TO_FRAG = path

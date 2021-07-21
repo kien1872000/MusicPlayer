@@ -11,9 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import com.example.musicplayer.MiniPlayer
-import com.example.musicplayer.MusicService
-import com.example.musicplayer.R
+import com.example.musicplayer.*
 import kotlinx.android.synthetic.main.fragment_mini_player.*
 import kotlinx.android.synthetic.main.song.*
 
@@ -27,7 +25,7 @@ private const val ARG_PARAM2 = "param2"
  * Use the [MiniPlayerFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class MiniPlayerFragment : Fragment(), ServiceConnection {
+class MiniPlayerFragment : Fragment(), ServiceConnection, OnMiniPlayerChangeListener{
     private var musicService: MusicService? = null;
     private var isStart = true
     override fun onCreateView(
@@ -123,27 +121,14 @@ class MiniPlayerFragment : Fragment(), ServiceConnection {
             }
         }
         mini_player_next_btn?.setOnClickListener {
-            Toast.makeText(activity, "Next", Toast.LENGTH_LONG).show()
-            musicService?.clickNext()
-            onMiniPlayerUpdate()
+            playNextSelf()
         }
         mini_player_play_btn?.setOnClickListener {
-            Toast.makeText(activity, "Play", Toast.LENGTH_LONG).show()
-            if(musicService!=null) {
-                musicService!!.clickPlay()
-                if(musicService!!.isPlaying()) {
-                    mini_player_play_btn.setImageResource(R.drawable.stop)
-                }
-                else {
-                    mini_player_play_btn.setImageResource(R.drawable.play)
-                }
-            }
+           playPauseSelf()
 
         }
         mini_player_prev_btn?.setOnClickListener {
-            Toast.makeText(activity, "Prev", Toast.LENGTH_LONG).show()
-            musicService?.clickPrev()
-            onMiniPlayerUpdate()
+            playPrevSelf()
         }
     }
 //    private fun onClickPlayBtn() {
@@ -151,7 +136,6 @@ class MiniPlayerFragment : Fragment(), ServiceConnection {
 //            mini_player_play_btn.setImageResource(R.)
 //        }
 //    }
-
     private fun onMiniPlayerUpdate() {
         val image = getAlbumArt(MiniPlayer.PATH_TO_FRAG.toString())
         val bitmap = image?.size?.let { BitmapFactory.decodeByteArray(image, 0, it) }
@@ -179,6 +163,8 @@ class MiniPlayerFragment : Fragment(), ServiceConnection {
 
 
         musicService = binder.getService()
+        musicService!!.setOtherCallBack(this)
+       // musicService!!.setCallBack(this)
 //        musicService!!.createMediaPlayerWithPath(MiniPlayer.PATH_TO_FRAG.toString())
 //        mini_player_play_btn.setImageResource(R.drawable.play)
 //        mini_player_play_btn.setOnClickListener {
@@ -192,5 +178,50 @@ class MiniPlayerFragment : Fragment(), ServiceConnection {
 //            }
 //        }
 
+    }
+
+    override fun playNext() {
+        Toast.makeText(activity, "Next1111", Toast.LENGTH_LONG).show()
+        //musicService?.clickNext()
+        onMiniPlayerUpdate()
+    }
+
+    override fun playPrev() {
+        Toast.makeText(activity, "Prev1111", Toast.LENGTH_LONG).show()
+        onMiniPlayerUpdate()
+    }
+
+    override fun playPause() {
+        Toast.makeText(activity, "Play111", Toast.LENGTH_LONG).show()
+        if(musicService!=null) {
+            //musicService!!.clickPlay()
+            if(musicService!!.isPlaying()) {
+                mini_player_play_btn.setImageResource(R.drawable.stop)
+            }
+            else {
+                mini_player_play_btn.setImageResource(R.drawable.play)
+            }
+        }
+    }
+    fun playNextSelf(){
+        Toast.makeText(activity, "Next1111", Toast.LENGTH_LONG).show()
+        musicService?.clickNext()
+        onMiniPlayerUpdate()
+    }
+    fun playPrevSelf(){
+        Toast.makeText(activity, "Prev1111", Toast.LENGTH_LONG).show()
+        musicService?.clickPrev()
+        onMiniPlayerUpdate()
+    }
+    fun playPauseSelf() {
+        if(musicService!=null) {
+            musicService!!.clickPlay()
+            if(musicService!!.isPlaying()) {
+                mini_player_play_btn.setImageResource(R.drawable.stop)
+            }
+            else {
+                mini_player_play_btn.setImageResource(R.drawable.play)
+            }
+        }
     }
 }
