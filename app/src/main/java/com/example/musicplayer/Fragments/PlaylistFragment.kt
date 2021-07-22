@@ -12,10 +12,11 @@ import com.example.musicplayer.Activities.MainActivity
 import com.example.musicplayer.Adapters.AlbumAdapter
 import com.example.musicplayer.Adapters.PlaylistAdapter
 import com.example.musicplayer.Models.Album
+import com.example.musicplayer.OnPlaylistItemChangeListener
 import com.example.musicplayer.R
 
 
-class PlaylistFragment : Fragment() {
+class PlaylistFragment : Fragment(), OnPlaylistItemChangeListener {
     companion object{
         var playlist_list = ArrayList<Album>()
     }
@@ -34,7 +35,6 @@ class PlaylistFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         playlist_recyclerView= view.findViewById(R.id.all_songs_playlist)
-        Log.d("TTTT", R.id.all_songs_playlist.toString())
         playlist_recyclerView?.setHasFixedSize(true);
         if(MainActivity.song_list.size>=1) {
             setPlaylistList()
@@ -50,6 +50,21 @@ class PlaylistFragment : Fragment() {
         playlist_list.add(Album("Playlist 2", ""))
         playlist_list.add(Album("Playlist 3", ""))
         playlist_list.add(Album("Playlist 4", ""))
+    }
+
+    override fun onResume() {
+        super.onResume()
+        playlistAdapter!!.notifyDataSetChanged()
+    }
+    override fun onDeletePlaylistItem(position: Int) {
+        if(playlist_list.size>=1) {
+            playlist_list.removeAt(position)
+            Log.d("zzzz", "Hế lồ")
+        }
+    }
+
+    override fun onAddPlaylistItem() {
+        TODO("Not yet implemented")
     }
 
 }

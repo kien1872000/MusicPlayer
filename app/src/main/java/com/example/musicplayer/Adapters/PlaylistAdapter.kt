@@ -44,8 +44,14 @@ class PlaylistAdapter(var context: Context?, var playlists: ArrayList<Album>) :
 
         viewHolder.itemView.setOnClickListener {
             val intent = Intent(context, PlaylistDetailActivity::class.java)
-            intent.putExtra("playlist_name", playlists[position].name)
+            intent.putExtra("playlistPosition", position)
             context?.startActivity(intent)
+        }
+        if(position==playlists.size-1) {
+            viewHolder.playlist_name.text = "Thêm playlist ở đây"
+            Glide.with(context!!).asBitmap()
+                .load(R.drawable.add_image)
+                .into(viewHolder.playlist_image)
         }
     }
     override fun getItemCount() = playlists.size

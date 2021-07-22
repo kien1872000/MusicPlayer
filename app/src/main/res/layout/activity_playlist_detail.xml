@@ -6,13 +6,24 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".Activities.PlaylistDetailActivity">
-    <ImageView
-        android:layout_marginTop="25dp"
-        android:id="@+id/playlist_image_detail"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:src="@drawable/song_image"
-        />
+    <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/playlist_detail_item_parent"
+        android:layout_marginTop="5dp"
+        app:cardCornerRadius="100dp"
+        android:layout_gravity="center"
+        >
+        <ImageView
+            android:id="@+id/playlist_image_detail"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_gravity="center"
+            android:src="@drawable/song_image"
+            />
+    </androidx.cardview.widget.CardView>
+
     <TextView
         android:id="@+id/playlist_name_detail"
         android:text="Không có bài hát nào"

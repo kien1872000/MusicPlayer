@@ -96,6 +96,10 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
 
     override fun onPause() {
         super.onPause()
+        var editor: SharedPreferences.Editor? = getSharedPreferences(MiniPlayer.LAST_PLAYED_SONG, Context.MODE_PRIVATE).edit()
+        editor?.putString(ServiceCommunication.SENDER_ACTIVITY, ServiceCommunication.PLAYER_ACTIVITY)
+        editor?.apply()
+        Log.d("BBBaA", "yes sir ${musicItems.size}")
         unbindService(this)
     }
     private fun getIntentMethod(){
@@ -136,9 +140,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
 //            musicService!!.start()
 //        }
         showNotification(R.drawable.stop, R.drawable.ic_pause)
-        intent = Intent(this, MusicService::class.java)
-        intent.putExtra("servicePosition", position)
-        startService(intent)
+        passDataToMusicService()
        // mediaPlayer!!.isLooping = true
 //        musicService!!.setVolume(0.5f, 0.5f)
 //        totalTime = musicService!!.getDuration()
@@ -271,9 +273,9 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         positionBar.max = totalTime
         playButton.setImageResource(R.drawable.stop)
         showNotification(R.drawable.stop, R.drawable.ic_pause)
-        musicService?.mediaPlayer?.setOnCompletionListener {
-            playPrev()
-        }
+//        musicService?.mediaPlayer?.setOnCompletionListener {
+//            playPrev()
+//        }
         MiniPlayer.PATH_TO_FRAG = musicItems[position].path;
         MiniPlayer.SONG_NAME_TO_FRAG = musicItems[position].name;
         MiniPlayer.SONG_ARTIST_TO_FRAG = musicItems[position].artist;
@@ -334,7 +336,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
 
     override fun onServiceDisconnected(name: ComponentName?) {
         musicService = null;
-        Log.d("12123", "yes")
         //topService();
 
     }
@@ -342,6 +343,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
         var myBinder: MusicService.MyBinder = service as MusicService.MyBinder
         musicService = myBinder.getService()
+        musicService?.onPlaylistDetailClickListener = null
         musicService?.setCallBack(this)
         Toast.makeText(this, "connected"+ musicService, Toast.LENGTH_LONG).show()
         musicService!!.setVolume(0.5f, 0.5f)
@@ -399,5 +401,14 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         setAutoCancel(true)
         var notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(0, nBuilder.build())
+    }
+    private fun passDataToMusicService() {
+        intent = Intent(this, MusicService::class.java)
+        intent.putExtra(ServiceCommunication.SERVICE_POSITION, position)
+        intent.putExtra(ServiceCommunication.GET_SONGS_LIST_ACTION,
+            musicItems
+        )
+        intent.putExtra(ServiceCommunication.SENDER_ACTIVITY, ServiceCommunication.PLAYER_ACTIVITY)
+        startService(intent)
     }
 }

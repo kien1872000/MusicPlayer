@@ -12,6 +12,7 @@ import android.util.Log
 import android.widget.Toast
 import com.example.musicplayer.Activities.MainActivity
 import com.example.musicplayer.Activities.PlaylistDetailActivity
+import com.example.musicplayer.Activities.ServiceCommunication
 import com.example.musicplayer.Models.Song
 
 class MusicService : Service() {
@@ -19,8 +20,9 @@ class MusicService : Service() {
     var mediaPlayer: MediaPlayer? =null
     var position: Int = -1;
     var actionPlaying: ActionPlaying? =null
-    var onMiniPlayerChangeListener: OnMiniPlayerChangeListener? = null;
-    var onPlaylistDetailClickListener: OnPlaylistDetailClickListener? = null;
+    var onMiniPlayerChangeListener: OnMiniPlayerChangeListener? = null
+    var onPlaylistDetailClickListener: OnPlaylistDetailClickListener? = null
+    private var sender: String? = null;
     inner class MyBinder : Binder() {
         fun getService() : MusicService? {
             return this@MusicService
@@ -40,47 +42,76 @@ class MusicService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         var myPosition: Int = -1;
-        var actionName = intent?.getStringExtra("ActionName")
-        if(intent!=null)  myPosition = intent.getIntExtra("servicePosition", -1)
+        sender = intent?.getStringExtra(ServiceCommunication.SENDER_ACTIVITY)
+        if(intent?.getSerializableExtra(ServiceCommunication.GET_SONGS_LIST_ACTION)!=null) {
+            musicFiles = intent?.getSerializableExtra(ServiceCommunication.GET_SONGS_LIST_ACTION) as ArrayList<Song>
+        }
+
+        var actionName = intent?.getStringExtra(ServiceCommunication.MEDIA_PLAYER_ACTION)
+        if(intent!=null)  myPosition = intent.getIntExtra(ServiceCommunication.SERVICE_POSITION, -1)
         if(myPosition!=-1){
-            Log.d("v111", myPosition.toString())
+
             playMedia(myPosition)
         }
         if(actionName!=null) {
             when(actionName) {
-                "playPause"-> {
-                    Toast.makeText(this, "PlayPause", Toast.LENGTH_LONG).show()
-                    actionPlaying?.playPause()
-                    onMiniPlayerChangeListener?.playPause()
-                    onPlaylistDetailClickListener?.playPause()
+                ServiceCommunication.ACTION_PLAY-> {
+                  //  Toast.makeText(this, "PlayPause", Toast.LENGTH_LONG).show()
+                   actionPlaying?.playPause()
+                   onPlaylistDetailClickListener?.playPause()
+                   onMiniPlayerChangeListener?.playPause()
+
                 }
-                "next"-> {
-                    Toast.makeText(this, "Next", Toast.LENGTH_LONG).show()
-                    actionPlaying?.playNext()
-                    onMiniPlayerChangeListener?.playNext()
+                ServiceCommunication.ACTION_NEXT-> {
+                  //  Toast.makeText(this, "Next", Toast.LENGTH_LONG).show()
+                   actionPlaying?.playNext()
                     onPlaylistDetailClickListener?.playNext()
+                    onMiniPlayerChangeListener?.playNext()
+
                 }
-                "previous"-> {
-                    Toast.makeText(this, "Previous", Toast.LENGTH_LONG).show()
-                    actionPlaying?.playPrev()
-                    onMiniPlayerChangeListener?.playPrev()
+                ServiceCommunication.ACTION_PREV-> {
+                   // Toast.makeText(this, "Previous", Toast.LENGTH_LONG).show()
+                   actionPlaying?.playPrev()
                     onPlaylistDetailClickListener?.playPrev()
+                    onMiniPlayerChangeListener?.playPrev()
+
                 }
             }
         }
         return START_STICKY
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mediaPlayer?.stop()
+        mediaPlayer?.release()
+    }
     fun clickNext() {
-        actionPlaying?.playNext()
+        if(sender!=null){
+            when(sender) {
+                ServiceCommunication.PLAYLIST_DETAIL_ACTIVITY -> onPlaylistDetailClickListener?.playNext()
+                ServiceCommunication.PLAYER_ACTIVITY -> actionPlaying?.playNext()
+            }
+        }
+
     }
     fun clickPrev() {
-        actionPlaying?.playPrev()
+        if(sender!=null){
+            when(sender) {
+                ServiceCommunication.PLAYLIST_DETAIL_ACTIVITY -> onPlaylistDetailClickListener?.playPrev()
+                ServiceCommunication.PLAYER_ACTIVITY -> actionPlaying?.playPrev()
+            }
+        }
     }
     fun clickPlay() {
-        actionPlaying?.playPause()
+        if(sender!=null){
+            when(sender) {
+                ServiceCommunication.PLAYLIST_DETAIL_ACTIVITY -> onPlaylistDetailClickListener?.playPause()
+                ServiceCommunication.PLAYER_ACTIVITY -> actionPlaying?.playPause()
+            }
+        }
     }
     private fun playMedia(startPosition: Int) {
-        musicFiles = PlaylistDetailActivity.playlist_songs
         position = startPosition
         if(mediaPlayer!=null){
             mediaPlayer!!.stop()

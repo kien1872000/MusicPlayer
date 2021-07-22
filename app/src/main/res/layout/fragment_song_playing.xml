@@ -7,11 +7,21 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center">
-
-    <ImageView
+    <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/song_image"/>
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/mini_player_item_parent"
+        app:cardCornerRadius="125dp"
+        android:layout_marginLeft="13dp"
+        >
+        <ImageView
+            android:layout_width="250dp"
+            android:layout_height="250dp"
+            android:src="@drawable/song_image"/>
+    </androidx.cardview.widget.CardView>
+
+
 
     <SeekBar
         android:id="@+id/positionBar"

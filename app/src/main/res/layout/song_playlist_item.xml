@@ -21,10 +21,10 @@
         android:ellipsize="end"
         android:maxLines="1"/>
     <ImageView
-        android:id="@+id/playlist_now_playing"
-        android:src="@drawable/now_playing"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginLeft="50dp"/>
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:src="@drawable/trash"
+        android:id="@+id/song_playlist_delete_btn"
+        android:layout_marginLeft="30dp"/>
 
 </LinearLayout>

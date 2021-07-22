@@ -2,6 +2,7 @@ package com.example.musicplayer.Activities
 
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.database.Cursor
@@ -16,6 +17,7 @@ import androidx.core.content.ContextCompat
 import com.example.musicplayer.Fragments.MainScreenFragment
 import com.example.musicplayer.MiniPlayer
 import com.example.musicplayer.Models.Song
+import com.example.musicplayer.MusicService
 import com.example.musicplayer.R
 
 
@@ -109,6 +111,8 @@ class MainActivity : AppCompatActivity() {
         val notifyManager: NotificationManager =
             applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notifyManager.cancelAll()
+        var intent = Intent(this, MusicService::class.java)
+        stopService(intent)
     }
 //    override fun onResume() {
 //        super.onResume()

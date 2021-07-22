@@ -1,11 +1,9 @@
 package com.example.musicplayer.Activities
 
+import android.app.AlertDialog
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
+import android.content.*
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.media.MediaMetadataRetriever
@@ -21,6 +19,7 @@ import androidx.core.app.NotificationCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.musicplayer.*
 import com.example.musicplayer.Adapters.PlaylistDetailAdapter
+import com.example.musicplayer.Fragments.PlaylistFragment
 import com.example.musicplayer.Fragments.SongSuggestFragment
 import com.example.musicplayer.Models.Song
 import kotlinx.android.synthetic.main.activity_player.*
@@ -47,20 +46,23 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
     private var playlistDetailAdapter: PlaylistDetailAdapter? = null
     private var mediaSessionCompat: MediaSessionCompat? = null
     private var musicService: MusicService? = null
+    private var isBound = false;
+    private var playlistPosition = -1;
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_playlist_detail)
         mediaSessionCompat = MediaSessionCompat(baseContext, "My audio")
         getIntentMethod()
-        var intent = Intent(this, MusicService::class.java)
-        bindService(intent, this, Context.BIND_AUTO_CREATE)
-        playlist_songs_listView?.setHasFixedSize(true)
+        if(playlist_songs.isNotEmpty()) {
+            bindMusicService()
+        }
 //        if(playlist_songs.size>=1){
-            playlistDetailAdapter = PlaylistDetailAdapter(this, playlist_songs, this)
-            var layoutManager = LinearLayoutManager(this)
-            layoutManager.orientation = LinearLayoutManager.VERTICAL
-            playlist_songs_listView?.layoutManager = layoutManager
-            playlist_songs_listView?.adapter = playlistDetailAdapter
+        playlistDetailAdapter = PlaylistDetailAdapter(this, playlist_songs, this)
+        var layoutManager = LinearLayoutManager(this)
+        layoutManager.orientation = LinearLayoutManager.VERTICAL
+        playlist_songs_listView?.layoutManager = layoutManager
+        playlist_songs_listView?.adapter = playlistDetailAdapter
+        playlist_songs_listView?.setHasFixedSize(true)
 //       }
     }
     private fun getIntentMethod(){
@@ -68,13 +70,9 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
             flag = true
             playlist_playButton.setImageResource(R.drawable.stop)
         }
-        play_list_name = intent.getStringExtra("playlist_name")
+        playlistPosition = intent.getIntExtra("playlistPosition", -1);
         initPlaylist()
-        if(playlist_songs.isNotEmpty()) {
-            intent = Intent(this, MusicService::class.java)
-            intent.putExtra("servicePosition", position)
-            startService(intent)
-        }
+
 
     }
     private fun setImage(uri: String){
@@ -89,14 +87,14 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
     }
     private fun initPlaylist(){
         playlist_songs.clear()
-        when(play_list_name){
-            "Playlist 1" -> {
+        when(playlistPosition){
+            0 -> {
                 playlist_songs.add(MainActivity.song_list[0])
                 playlist_songs.add(MainActivity.song_list[1])
                 playlist_songs.add(MainActivity.song_list[2])
                 playlist_songs.add(MainActivity.song_list[3])
             }
-            "Playlist 2"->{
+            1 ->{
                 playlist_songs.add(MainActivity.song_list[4])
             }
         }
@@ -131,9 +129,64 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
             }
         }
     }
+
+    override fun onDeleteItem(position: Int) {
+       confirmDelete(position)
+    }
+    private fun deletePlaylistItem(position: Int) {
+        playlist_songs.removeAt(position)
+        musicService!!.musicFiles = playlist_songs;
+        if(position<this.position) this.position--
+        else if(position==this.position) {
+            Log.d("BBBaA", "yes sir ${playlist_songs.size}")
+            this.position--
+            if(playlist_songs.size>0) playNext()
+            else {
+                deletePlaylist()
+                var onPlaylistItemChangeListener: OnPlaylistItemChangeListener = PlaylistFragment()
+                onPlaylistItemChangeListener.onDeletePlaylistItem(playlistPosition)
+            }
+
+        }
+        musicService!!.position = this.position
+        playlistDetailAdapter!!.notifyDataSetChanged()
+    }
+    private fun deletePlaylist() {
+        onBackPressed()
+        //unbindService(this)
+        var editor: SharedPreferences.Editor? = getSharedPreferences(MiniPlayer.LAST_PLAYED_SONG, Context.MODE_PRIVATE).edit()
+        editor?.putBoolean(MiniPlayer.START_PLAYER_ACTIVITY, false)
+        editor?.apply();
+        val notifyManager: NotificationManager =
+            applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notifyManager.cancelAll()
+        var intent = Intent(this, MusicService::class.java)
+        stopService(intent)
+    }
+    private fun confirmDelete(position: Int) {
+        var msg: String = "Bạn chắc chắn muốn xóa bài hát này?"
+        if(playlist_songs.size<=1) {
+            msg = "Bạn có chắc muốn xóa bài hát này? Nếu xóa thì playlist này sẽ bị xóa luôn";
+        }
+        val builder: AlertDialog.Builder? = this?.let {
+            AlertDialog.Builder(it)
+        }
+        builder?.setMessage(msg)?.setTitle("Xác nhận")
+        builder?.setPositiveButton("Có", DialogInterface.OnClickListener {
+                dialog, id->
+            deletePlaylistItem(position)
+
+        })
+        builder?.setNegativeButton("Không", DialogInterface.OnClickListener {
+                dialog, id->
+
+        })
+        builder?.show()
+    }
     private fun addSong(){
         addButton.setOnClickListener {
            showDialog()
+//            if(musicService!=null&&mus)
         }
     }
     private fun playBtnClick(){
@@ -193,27 +246,32 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         }
     }
     override fun playNext(){
-        Toast.makeText(this, "PlayNext", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "PlayNext Hế lồ", Toast.LENGTH_SHORT).show()
         if(!isRepeat){
             position = (position+1)% playlist_songs.size
             if(isShuffle){
                 position = (position until playlist_songs.size).random()
             }
         }
+//        if(position>=musicService!!.musicFiles.size) passDataToMusicService()
         musicService!!.stop()
         musicService!!.release()
         uri = Uri.parse(playlist_songs[position].path)
         musicService!!.createMediaPlayer(position)
         setImage(uri.toString())
         playlist_playButton.setImageResource(R.drawable.stop)
+        showNotification(R.drawable.stop, R.drawable.ic_pause)
         playlist_name_detail.text = playlist_songs[position].name
         musicService!!.start()
         musicService?.mediaPlayer?.setOnCompletionListener {
             playNext()
         }
+        MiniPlayer.PATH_TO_FRAG = playlist_songs[position].path;
+        MiniPlayer.SONG_NAME_TO_FRAG = playlist_songs[position].name;
+        MiniPlayer.SONG_ARTIST_TO_FRAG = playlist_songs[position].artist;
     }
     override fun playPrev(){
-        Toast.makeText(this, "PlayPrev", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "PlayPrev Hế lồ", Toast.LENGTH_SHORT).show()
         if(!isRepeat){
             position = if(position>0)  position -1 else playlist_songs.size-1
             if(isShuffle){
@@ -226,8 +284,12 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         musicService!!.createMediaPlayer(position)
         setImage(uri.toString())
         playlist_playButton.setImageResource(R.drawable.stop)
+        showNotification(R.drawable.stop, R.drawable.ic_pause)
         playlist_name_detail.text = playlist_songs[position].name
         musicService!!.start()
+        MiniPlayer.PATH_TO_FRAG = playlist_songs[position].path;
+        MiniPlayer.SONG_NAME_TO_FRAG = playlist_songs[position].name;
+        MiniPlayer.SONG_ARTIST_TO_FRAG = playlist_songs[position].artist;
     }
     private fun playRepeat(){
         if(!isRepeat){
@@ -252,17 +314,24 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
 
     }
     override fun playPause(){
-        Toast.makeText(this, "PlayPause", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "PlayPause hế lồ", Toast.LENGTH_SHORT).show()
         if(musicService!=null) {
-            if(musicService!=null&&musicService!!.isPlaying()){
+            if(musicService!!.isPlaying()){
                 musicService!!.pause()
+                showNotification(R.drawable.play, R.drawable.ic_play)
                 playlist_playButton.setImageResource(R.drawable.play)
+                MiniPlayer.PLAY_PAUSE = "Pause"
             }
             else{
                 musicService!!.start()
+                showNotification(R.drawable.stop, R.drawable.ic_pause)
                 playlist_playButton.setImageResource(R.drawable.stop)
+                MiniPlayer.PLAY_PAUSE = "Play"
             }
         }
+        MiniPlayer.PATH_TO_FRAG = playlist_songs[position].path;
+        MiniPlayer.SONG_NAME_TO_FRAG = playlist_songs[position].name;
+        MiniPlayer.SONG_ARTIST_TO_FRAG = playlist_songs[position].artist;
 
     }
     override fun onResume() {
@@ -276,31 +345,32 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         addSong()
     }
     private fun showDialog(){
-        val newFragment = SongSuggestFragment(this)
+        val newFragment = SongSuggestFragment(this, playlist_songs)
         newFragment.show(supportFragmentManager, "add song dialog")
     }
 
-    override fun onClick() {
-        var playlist_song_temps = ArrayList<Song>()
-        playlist_song_temps.addAll(playlist_songs)
-        playlistDetailAdapter!!.songs.clear()
-        playlistDetailAdapter = PlaylistDetailAdapter(this, playlist_song_temps, this)
-        var layoutManager = LinearLayoutManager(this)
-        layoutManager.orientation = LinearLayoutManager.VERTICAL
-        playlist_songs_listView?.layoutManager = layoutManager
-        playlist_songs_listView?.adapter = playlistDetailAdapter
+    override fun onClick(songs: ArrayList<Song>) {
+        playlist_songs.addAll(songs);
         playlistDetailAdapter!!.notifyDataSetChanged()
-        playlist_songs.addAll(playlist_song_temps)
-        if(!playlist_songs.isEmpty()){
-            if(musicService==null||musicService!!.mediaPlayer==null){
-                uri = Uri.parse(playlist_songs[0].path)
-                playlist_name_detail.text = playlist_songs[0].name
-                setImage(uri.toString())
-                musicService!!.createMediaPlayer(position)
-                playlist_playButton.setImageResource(R.drawable.stop)
-                musicService!!.start()
-            }
-        }
+        musicService?.musicFiles = playlist_songs
+        if(musicService==null) bindMusicService()
+//        if(playlist_songs.isNotEmpty()){
+//
+//            if(!isBound){
+//                bindMusicService()
+//
+////                  uri = Uri.parse(playlist_songs[0].path)
+////                  playlist_name_detail.text = playlist_songs[0].name
+////                  setImage(uri.toString())
+////                  musicService!!.createMediaPlayer(position)
+////                  playlist_playButton.setImageResource(R.drawable.stop)
+////                  musicService!!.start()
+//            }
+//            else {
+//                Log.d("AAAAA", "yes sir ${playlist_songs.size}")
+//                passDataToMusicService()
+//            }
+//        }
     }
     fun showNotification(playPauseBtn: Int, playNoti: Int){
         var intent = Intent(this,PlayerActivity::class.java)
@@ -352,27 +422,50 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
         var myBinder: MusicService.MyBinder = service as MusicService.MyBinder
         musicService = myBinder.getService()
+        musicService?.actionPlaying =null;
         musicService?.setOnPlaylistDetailClick(this)
         if(playlist_songs.isNotEmpty()){
-            Log.d("AAAAA", playlist_songs[0].name)
-
-            uri = Uri.parse(playlist_songs[0].path)
-            if(musicService!=null){
-                setImage(uri.toString())
-                playlist_name_detail.text = playlist_songs[0].name
-                musicService!!.stop()
-                musicService!!.release()
-                //mediaPlayer = MediaPlayer.create(applicationContext, uri)
-                musicService!!.createMediaPlayer(position)
-                musicService!!.start()
-            }
+          if(!isBound) {
+              showNotification(R.drawable.stop, R.drawable.ic_pause)
+              uri = Uri.parse(playlist_songs[0].path)
+              setImage(uri.toString())
+              playlist_name_detail.text = playlist_songs[0].name
+              musicService!!.stop()
+              musicService!!.release()
+              //mediaPlayer = MediaPlayer.create(applicationContext, uri)
+              musicService!!.createMediaPlayer(position)
+              musicService!!.start()
+              isBound = true;
+          }
         }
         Toast.makeText(this, "connected"+ musicService, Toast.LENGTH_LONG).show()
         autoNext()
-    }
 
+    }
+    private fun passDataToMusicService() {
+        intent = Intent(this, MusicService::class.java)
+        intent.putExtra(ServiceCommunication.SERVICE_POSITION, position)
+        intent.putExtra(ServiceCommunication.GET_SONGS_LIST_ACTION, playlist_songs)
+        intent.putExtra(ServiceCommunication.SENDER_ACTIVITY, ServiceCommunication.PLAYLIST_DETAIL_ACTIVITY)
+        startService(intent)
+    }
+    private fun bindMusicService() {
+        intent = Intent(this, MusicService::class.java)
+        intent.putExtra(ServiceCommunication.SERVICE_POSITION, this.position)
+        intent.putExtra(ServiceCommunication.GET_SONGS_LIST_ACTION, playlist_songs)
+        intent.putExtra(ServiceCommunication.SENDER_ACTIVITY, ServiceCommunication.PLAYLIST_DETAIL_ACTIVITY)
+        startService(intent)
+        var intent = Intent(this, MusicService::class.java)
+        bindService(intent, this, Context.BIND_AUTO_CREATE)
+    }
     override fun onPause() {
         super.onPause()
-       unbindService(this);
+        var editor: SharedPreferences.Editor? = getSharedPreferences(MiniPlayer.LAST_PLAYED_SONG, Context.MODE_PRIVATE).edit()
+        editor?.putString(ServiceCommunication.SENDER_ACTIVITY, ServiceCommunication.PLAYLIST_DETAIL_ACTIVITY)
+        editor?.apply()
+        if(isBound) {
+            unbindService(this)
+            isBound = false;
+        }
     }
 }

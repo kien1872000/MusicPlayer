@@ -23,10 +23,11 @@ import com.example.musicplayer.SongSuggestClickListener
 import kotlinx.android.synthetic.main.diaglog_song_suggest.*
 import kotlinx.android.synthetic.main.song_suggest_item.*
 
-class SongSuggestFragment(var onAcceptClick: OnAcceptClickListener?): DialogFragment(), SongSuggestClickListener {
-    private var song_suggests = ArrayList<Song>()
+class SongSuggestFragment(var onAcceptClick: OnAcceptClickListener?, var songsInPlaylist: ArrayList<Song>?): DialogFragment(), SongSuggestClickListener {
+    private var songsSuggest = ArrayList<Song>()
     private var songAdapter: SongSuggestAdapter? = null
     private var checkList = ArrayList<Boolean>()
+    private var songsSelected = ArrayList<Song>()
     private lateinit var dialogView: View
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let {
@@ -40,10 +41,11 @@ class SongSuggestFragment(var onAcceptClick: OnAcceptClickListener?): DialogFrag
                 // Add action buttons
                 .setPositiveButton("Thêm",
                     DialogInterface.OnClickListener { dialog, id ->
-                        for(i in 0..checkList.size-1){
-                            if(checkList[i]) PlaylistDetailActivity.playlist_songs.add(song_suggests[i])
+                        songsSelected.clear()
+                        for(i in 0 until checkList.size) {
+                            if(checkList[i]) songsSelected.add(songsSuggest[i])
                         }
-                        onAcceptClick!!.onClick()
+                        onAcceptClick!!.onClick(songsSelected)
                     })
                 .setNegativeButton("Hủy",
                     DialogInterface.OnClickListener { dialog, id ->
@@ -53,18 +55,22 @@ class SongSuggestFragment(var onAcceptClick: OnAcceptClickListener?): DialogFrag
         } ?: throw IllegalStateException("Activity cannot be null")
     }
     private fun initSongSuggests(){
-        if(PlaylistDetailActivity.playlist_songs.isEmpty()){
-            song_suggests.addAll(MainActivity.song_list)
-            for(index in 0 until (song_suggests.size)) checkList.add(false)
-            Log.d("kkkkk", "song_sugges: ${song_suggests.size}, checkList: ${checkList.size}")
+        songsSuggest.clear()
+        checkList.clear()
+        if(songsInPlaylist.isNullOrEmpty()){
+            songsSuggest.addAll(MainActivity.song_list)
+            for(index in 0 until (songsSuggest.size)) checkList.add(false)
         }
         else{
-            song_suggests.clear()
-            checkList.clear()
             for(song in MainActivity.song_list){
-                if(song !in PlaylistDetailActivity.playlist_songs)  song_suggests.add(song)
+                if(!songsInPlaylist.isNullOrEmpty()) {
+                    if(!songsInPlaylist!!.any{ it.path == song.path }) {
+                        songsSuggest.add(song)
+                    }
+                }
             }
-            for(index in 0 until (song_suggests.size) ) {checkList.add(false)}
+            for(index in 0 until (songsSuggest.size) ) {checkList.add(false)}
+            Log.d("kkkkk", "song_sugges: ${songsSuggest.size}, checkList: ${checkList.size}")
         }
     }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -74,7 +80,7 @@ class SongSuggestFragment(var onAcceptClick: OnAcceptClickListener?): DialogFrag
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         initSongSuggests()
-        songAdapter = SongSuggestAdapter(activity!!,  song_suggests, this)
+        songAdapter = SongSuggestAdapter(activity!!,  songsSuggest, this)
         var layoutManager: LinearLayoutManager = LinearLayoutManager(activity)
         layoutManager.orientation = LinearLayoutManager.VERTICAL
         song_suggests_listView?.layoutManager = layoutManager
@@ -86,8 +92,8 @@ class SongSuggestFragment(var onAcceptClick: OnAcceptClickListener?): DialogFrag
         if(!checkList[position]){
             checkList[position] = true
             var view = song_suggests_listView.layoutManager?.findViewByPosition(position)
-            var check_image = view?.findViewById(R.id.check_img) as ImageView
-            check_image.setColorFilter(Color.GREEN)
+            var checkImage = view?.findViewById(R.id.check_img) as ImageView
+            checkImage.setColorFilter(Color.GREEN)
         }
         else{
             checkList[position] = false
@@ -98,7 +104,6 @@ class SongSuggestFragment(var onAcceptClick: OnAcceptClickListener?): DialogFrag
     }
 
     override fun onDestroy() {
-        Log.d("kkkkk", "121212")
         super.onDestroy()
     }
 }

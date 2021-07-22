@@ -112,7 +112,6 @@ class MiniPlayerFragment : Fragment(), ServiceConnection, OnMiniPlayerChangeList
                 mini_player_song_name.text = MiniPlayer.SONG_NAME_TO_FRAG
                 mini_player_song_artist.text = MiniPlayer.SONG_ARTIST_TO_FRAG
                 if(MiniPlayer.PLAY_PAUSE == "Play") {
-                    Log.d("T1221", MiniPlayer.PATH_TO_FRAG.toString())
                     mini_player_play_btn.setImageResource(R.drawable.stop)
                 }
                 else {
@@ -137,6 +136,7 @@ class MiniPlayerFragment : Fragment(), ServiceConnection, OnMiniPlayerChangeList
 //        }
 //    }
     private fun onMiniPlayerUpdate() {
+
         val image = getAlbumArt(MiniPlayer.PATH_TO_FRAG.toString())
         val bitmap = image?.size?.let { BitmapFactory.decodeByteArray(image, 0, it) }
         if(bitmap!=null){
@@ -151,6 +151,7 @@ class MiniPlayerFragment : Fragment(), ServiceConnection, OnMiniPlayerChangeList
     }
     override fun onPause() {
         super.onPause()
+        Log.d("T111", "He^lo")
         activity?.unbindService(this)
 
     }
@@ -181,18 +182,18 @@ class MiniPlayerFragment : Fragment(), ServiceConnection, OnMiniPlayerChangeList
     }
 
     override fun playNext() {
-        Toast.makeText(activity, "Next1111", Toast.LENGTH_LONG).show()
+//        Toast.makeText(activity, "Next2222", Toast.LENGTH_LONG).show()
         //musicService?.clickNext()
         onMiniPlayerUpdate()
     }
 
     override fun playPrev() {
-        Toast.makeText(activity, "Prev1111", Toast.LENGTH_LONG).show()
+//        Toast.makeText(activity, "Prev2222", Toast.LENGTH_LONG).show()
         onMiniPlayerUpdate()
     }
 
     override fun playPause() {
-        Toast.makeText(activity, "Play111", Toast.LENGTH_LONG).show()
+//        Toast.makeText(activity, "Play2222", Toast.LENGTH_LONG).show()
         if(musicService!=null) {
             //musicService!!.clickPlay()
             if(musicService!!.isPlaying()) {
@@ -203,17 +204,18 @@ class MiniPlayerFragment : Fragment(), ServiceConnection, OnMiniPlayerChangeList
             }
         }
     }
-    fun playNextSelf(){
-        Toast.makeText(activity, "Next1111", Toast.LENGTH_LONG).show()
+    private fun playNextSelf(){
+        //Toast.makeText(activity, "Next1111", Toast.LENGTH_LONG).show()
         musicService?.clickNext()
         onMiniPlayerUpdate()
     }
-    fun playPrevSelf(){
-        Toast.makeText(activity, "Prev1111", Toast.LENGTH_LONG).show()
+    private fun playPrevSelf(){
+        //Toast.makeText(activity, "Prev1111", Toast.LENGTH_LONG).show()
         musicService?.clickPrev()
         onMiniPlayerUpdate()
     }
-    fun playPauseSelf() {
+    private fun playPauseSelf() {
+        //Toast.makeText(activity, "Pause1111", Toast.LENGTH_LONG).show()
         if(musicService!=null) {
             musicService!!.clickPlay()
             if(musicService!!.isPlaying()) {
