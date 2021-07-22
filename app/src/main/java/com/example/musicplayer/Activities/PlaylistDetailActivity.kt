@@ -14,8 +14,13 @@ import android.os.Bundle
 import android.os.IBinder
 import android.support.v4.media.session.MediaSessionCompat
 import android.util.Log
+import android.view.View
+import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
+import androidx.core.view.get
+import androidx.core.view.iterator
+import androidx.core.view.size
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.musicplayer.*
 import com.example.musicplayer.Adapters.PlaylistDetailAdapter
@@ -30,6 +35,7 @@ import kotlinx.android.synthetic.main.fragment_playlist.*
 import kotlinx.android.synthetic.main.fragment_song_playing.*
 import kotlinx.android.synthetic.main.song.*
 import kotlinx.android.synthetic.main.song.song_image
+import kotlinx.android.synthetic.main.song_playlist_item.view.*
 import kotlin.math.log
 
 class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickListener, ServiceConnection, OnPlaylistDetailClickListener {
@@ -108,6 +114,10 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
     }
     override fun onClickItem(position: Int) {
         this.position = position
+        stopWaveBar()
+        playlist_songs_listView[position].song_playlist_vumeter.resume(true)
+        playlist_songs_listView[position].song_playlist_vumeter.visibility = View.VISIBLE
+        showNotification(R.drawable.stop, R.drawable.ic_pause)
         if(musicService!=null) {
             if(musicService!!.isPlaying()){
                 musicService!!.stop()
@@ -138,7 +148,6 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         musicService!!.musicFiles = playlist_songs;
         if(position<this.position) this.position--
         else if(position==this.position) {
-            Log.d("BBBaA", "yes sir ${playlist_songs.size}")
             this.position--
             if(playlist_songs.size>0) playNext()
             else {
@@ -253,6 +262,10 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
                 position = (position until playlist_songs.size).random()
             }
         }
+        Log.d("BBBaA", "yes sir ${playlist_songs_listView.size}")
+        stopWaveBar()
+        playlist_songs_listView[position].song_playlist_vumeter.resume(true)
+        playlist_songs_listView[position].song_playlist_vumeter.visibility = View.VISIBLE
 //        if(position>=musicService!!.musicFiles.size) passDataToMusicService()
         musicService!!.stop()
         musicService!!.release()
@@ -270,6 +283,11 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         MiniPlayer.SONG_NAME_TO_FRAG = playlist_songs[position].name;
         MiniPlayer.SONG_ARTIST_TO_FRAG = playlist_songs[position].artist;
     }
+    private fun stopWaveBar() {
+        for(view in playlist_songs_listView) {
+            view.song_playlist_vumeter.visibility = View.INVISIBLE
+        }
+    }
     override fun playPrev(){
         Toast.makeText(this, "PlayPrev Hế lồ", Toast.LENGTH_SHORT).show()
         if(!isRepeat){
@@ -278,6 +296,9 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
                 position = (0..position).random()
             }
         }
+        stopWaveBar()
+        playlist_songs_listView[position].song_playlist_vumeter.resume(true)
+        playlist_songs_listView[position].song_playlist_vumeter.visibility = View.VISIBLE
         musicService!!.stop()
         musicService!!.release()
         uri = Uri.parse(playlist_songs[position].path)
@@ -317,12 +338,14 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         Toast.makeText(this, "PlayPause hế lồ", Toast.LENGTH_SHORT).show()
         if(musicService!=null) {
             if(musicService!!.isPlaying()){
+                playlist_songs_listView[position].song_playlist_vumeter.pause()
                 musicService!!.pause()
                 showNotification(R.drawable.play, R.drawable.ic_play)
                 playlist_playButton.setImageResource(R.drawable.play)
                 MiniPlayer.PLAY_PAUSE = "Pause"
             }
             else{
+                playlist_songs_listView[position].song_playlist_vumeter.resume(true)
                 musicService!!.start()
                 showNotification(R.drawable.stop, R.drawable.ic_pause)
                 playlist_playButton.setImageResource(R.drawable.stop)
@@ -344,6 +367,7 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         autoNext()
         addSong()
     }
+
     private fun showDialog(){
         val newFragment = SongSuggestFragment(this, playlist_songs)
         newFragment.show(supportFragmentManager, "add song dialog")
@@ -372,7 +396,7 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
 //            }
 //        }
     }
-    fun showNotification(playPauseBtn: Int, playNoti: Int){
+    private fun showNotification(playPauseBtn: Int, playNoti: Int){
         var intent = Intent(this,PlayerActivity::class.java)
         var contentIntent = PendingIntent.getActivity(this, 0,intent, 0)
 
@@ -426,6 +450,7 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         musicService?.setOnPlaylistDetailClick(this)
         if(playlist_songs.isNotEmpty()){
           if(!isBound) {
+              playlist_songs_listView[0].song_playlist_vumeter.visibility = View.VISIBLE
               showNotification(R.drawable.stop, R.drawable.ic_pause)
               uri = Uri.parse(playlist_songs[0].path)
               setImage(uri.toString())

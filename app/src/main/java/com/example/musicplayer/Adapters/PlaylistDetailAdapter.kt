@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayer.Models.Song
 import com.example.musicplayer.OnSongClick
 import com.example.musicplayer.R
+import io.gresse.hugo.vumeterlibrary.VuMeterView
 import kotlinx.android.synthetic.main.song_playlist_item.view.*
 
 
@@ -23,10 +24,12 @@ class PlaylistDetailAdapter(var context: Context?, var songs: ArrayList<Song>, v
         var song_name: TextView
         var song_image: ImageView
         var delete_btn: ImageView
+        var wave_bar: VuMeterView
         init{
             song_name = view.findViewById(R.id.song_playlist_name) as TextView
             song_image = view.findViewById(R.id.song_playlist_image) as ImageView
             delete_btn = view. findViewById(R.id.song_playlist_delete_btn) as ImageView
+            wave_bar = view.findViewById(R.id.song_playlist_vumeter) as VuMeterView
         }
     }
 
@@ -53,6 +56,7 @@ class PlaylistDetailAdapter(var context: Context?, var songs: ArrayList<Song>, v
 
         holder.itemView.setOnClickListener{
           onSongClick!!.onClickItem(position)
+
         }
         holder.itemView.song_playlist_delete_btn.setOnClickListener{
             onSongClick!!.onDeleteItem(position)

@@ -1,44 +1,47 @@
 package com.example.musicplayer.Activities
 
-import android.annotation.SuppressLint
-import android.app.Notification
+import android.R.attr.*
+import android.animation.Animator
+import android.animation.ObjectAnimator
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.*
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.graphics.Color.BLACK
+import android.graphics.Matrix
 import android.media.MediaMetadataRetriever
-import android.media.MediaPlayer
 import android.net.Uri
-import android.os.*
+import android.os.Build
+import android.os.Bundle
+import android.os.Handler
+import android.os.IBinder
 import android.support.v4.media.session.MediaSessionCompat
-import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
-import android.widget.Button
+import android.view.animation.Animation
+import android.view.animation.LinearInterpolator
+import android.view.animation.RotateAnimation
+import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
-import androidx.core.os.postDelayed
 import com.example.musicplayer.*
 import com.example.musicplayer.ApplicationClass.Companion.ACTION_NEXT
 import com.example.musicplayer.ApplicationClass.Companion.ACTION_PLAY
 import com.example.musicplayer.ApplicationClass.Companion.ACTION_PREVIOUS
 import com.example.musicplayer.ApplicationClass.Companion.CHANNEL_ID_2
-import com.example.musicplayer.Fragments.AlbumFragment
 import com.example.musicplayer.Models.Song
 import kotlinx.android.synthetic.main.activity_player.*
-import kotlinx.android.synthetic.main.fragment_song_playing.*
 import kotlinx.android.synthetic.main.fragment_song_playing.elapsedTimeLabel
-import kotlinx.android.synthetic.main.fragment_song_playing.playBtn
 import kotlinx.android.synthetic.main.fragment_song_playing.positionBar
 import kotlinx.android.synthetic.main.fragment_song_playing.remainingTimeLabel
 import kotlinx.android.synthetic.main.fragment_song_playing.volumeBar
-import kotlinx.android.synthetic.main.song.*
 import kotlinx.android.synthetic.main.song.song_image
+
 
 class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     //private var mediaPlayer: MediaPlayer? = null
+    private var anim: ObjectAnimator? =null
     private var uri: Uri? = null
     private var totalTime: Int = 0
     private var position: Int = -1
@@ -53,6 +56,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_player)
+        stopRotateSongImage()
         mediaSessionCompat = MediaSessionCompat(baseContext, "My audio")
         getIntentMethod()
         onVolumeBarChange()
@@ -82,7 +86,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         playThread.start()
     }
     override fun onResume() {
-
         var intent = Intent(this, MusicService::class.java)
         bindService(intent, this, Context.BIND_AUTO_CREATE)
         shuffleBtnClick()
@@ -99,8 +102,8 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         var editor: SharedPreferences.Editor? = getSharedPreferences(MiniPlayer.LAST_PLAYED_SONG, Context.MODE_PRIVATE).edit()
         editor?.putString(ServiceCommunication.SENDER_ACTIVITY, ServiceCommunication.PLAYER_ACTIVITY)
         editor?.apply()
-        Log.d("BBBaA", "yes sir ${musicItems.size}")
         unbindService(this)
+        stopRotateSongImage()
     }
     private fun getIntentMethod(){
         if(!flag) {
@@ -117,6 +120,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
             musicItems = MainActivity.song_list
         }
         if(position>=0) {
+            anim!!.start()
             uri = Uri.parse(musicItems[position].path)
             var image = getAlbumArt(uri.toString())
             val bitmap = image?.size?.let { BitmapFactory.decodeByteArray(image, 0, it) }
@@ -182,20 +186,22 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     override fun playPause() {
         if (musicService!!.isPlaying()) {
             // Stop
+            anim!!.pause()
             musicService!!.pause()
             playButton.setImageResource(R.drawable.play)
             showNotification(R.drawable.play, R.drawable.ic_play)
             MiniPlayer.PLAY_PAUSE = "Pause"
         } else {
             // Start
+            anim!!.resume()
             musicService!!.start()
             showNotification(R.drawable.stop, R.drawable.ic_pause)
             playButton.setImageResource(R.drawable.stop)
             MiniPlayer.PLAY_PAUSE = "Play"
         }
-        MiniPlayer.PATH_TO_FRAG = musicItems[position].path;
-        MiniPlayer.SONG_NAME_TO_FRAG = musicItems[position].name;
-        MiniPlayer.SONG_ARTIST_TO_FRAG = musicItems[position].artist;
+        MiniPlayer.PATH_TO_FRAG = musicItems[position].path
+        MiniPlayer.SONG_NAME_TO_FRAG = musicItems[position].name
+        MiniPlayer.SONG_ARTIST_TO_FRAG = musicItems[position].artist
     }
     private fun playBtnClick() {
         playButton.setOnClickListener {
@@ -218,11 +224,11 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
                     repeatButton.setColorFilter(Color.BLACK)
                 }
-                isRepeat = false;
+                isRepeat = false
             }
             else{
                 repeatButton.setColorFilter(Color.BLUE)
-                isRepeat = true;
+                isRepeat = true
             }
         }
     }
@@ -230,11 +236,11 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         shuffleButton.setOnClickListener{
             if(isShuffle){
                 shuffleButton.setColorFilter(Color.BLACK)
-                isShuffle = false;
+                isShuffle = false
             }
             else{
                 shuffleButton.setColorFilter(Color.BLUE)
-                isShuffle = true;
+                isShuffle = true
             }
         }
     }
@@ -244,6 +250,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         }
     }
     override fun playPrev(){
+        anim!!.resume()
         musicService!!.reset()
         if(!isRepeat){
             if(position>0) position--
@@ -276,11 +283,12 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
 //        musicService?.mediaPlayer?.setOnCompletionListener {
 //            playPrev()
 //        }
-        MiniPlayer.PATH_TO_FRAG = musicItems[position].path;
-        MiniPlayer.SONG_NAME_TO_FRAG = musicItems[position].name;
-        MiniPlayer.SONG_ARTIST_TO_FRAG = musicItems[position].artist;
+        MiniPlayer.PATH_TO_FRAG = musicItems[position].path
+        MiniPlayer.SONG_NAME_TO_FRAG = musicItems[position].name
+        MiniPlayer.SONG_ARTIST_TO_FRAG = musicItems[position].artist
     }
     override fun playNext(){
+        anim!!.resume()
         musicService!!.reset()
         if(!isRepeat){
             position = (position+1)%musicItems.size
@@ -310,9 +318,9 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         musicService?.mediaPlayer?.setOnCompletionListener {
             playNext()
         }
-        MiniPlayer.PATH_TO_FRAG = musicItems[position].path;
-        MiniPlayer.SONG_NAME_TO_FRAG = musicItems[position].name;
-        MiniPlayer.SONG_ARTIST_TO_FRAG = musicItems[position].artist;
+        MiniPlayer.PATH_TO_FRAG = musicItems[position].path
+        MiniPlayer.SONG_NAME_TO_FRAG = musicItems[position].name
+        MiniPlayer.SONG_ARTIST_TO_FRAG = musicItems[position].artist
     }
     private fun getAlbumArt(uri: String): ByteArray? {
         val retriever = MediaMetadataRetriever()
@@ -335,7 +343,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
 
 
     override fun onServiceDisconnected(name: ComponentName?) {
-        musicService = null;
+        musicService = null
         //topService();
 
     }
@@ -410,5 +418,26 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         )
         intent.putExtra(ServiceCommunication.SENDER_ACTIVITY, ServiceCommunication.PLAYER_ACTIVITY)
         startService(intent)
+    }
+    private fun rotateSongImage(){
+        val rotateAnimation = RotateAnimation(
+            0f, 360f,
+            Animation.RELATIVE_TO_SELF, 0.5f,
+            Animation.RELATIVE_TO_SELF, 0.5f
+        )
+
+        rotateAnimation.interpolator = LinearInterpolator()
+        rotateAnimation.duration = 7500
+        rotateAnimation.repeatCount = Animation.INFINITE
+        rotateAnimation.repeatMode
+        Log.d("BBBaA", "yes sir ${song_image.pivotX}")
+        song_image.startAnimation(rotateAnimation)
+    }
+    private fun stopRotateSongImage() {
+        anim = ObjectAnimator.ofFloat(song_image, "rotation", 0F, 360F)
+        anim!!.duration = 7500
+        anim!!.repeatCount = Animation.INFINITE
+        anim!!.interpolator = LinearInterpolator()
+       anim!!.repeatMode = ObjectAnimator.RESTART
     }
 }
