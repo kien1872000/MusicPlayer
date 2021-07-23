@@ -25,6 +25,7 @@ import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
+import com.bumptech.glide.Glide
 import com.example.musicplayer.*
 import com.example.musicplayer.ApplicationClass.Companion.ACTION_NEXT
 import com.example.musicplayer.ApplicationClass.Companion.ACTION_PLAY
@@ -32,6 +33,7 @@ import com.example.musicplayer.ApplicationClass.Companion.ACTION_PREVIOUS
 import com.example.musicplayer.ApplicationClass.Companion.CHANNEL_ID_2
 import com.example.musicplayer.Models.Song
 import kotlinx.android.synthetic.main.activity_player.*
+import kotlinx.android.synthetic.main.fragment_song_playing.*
 import kotlinx.android.synthetic.main.fragment_song_playing.elapsedTimeLabel
 import kotlinx.android.synthetic.main.fragment_song_playing.positionBar
 import kotlinx.android.synthetic.main.fragment_song_playing.remainingTimeLabel
@@ -57,6 +59,8 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_player)
         stopRotateSongImage()
+        repeatButton.setColorFilter(Color.WHITE)
+        shuffleButton.setColorFilter(Color.WHITE)
         mediaSessionCompat = MediaSessionCompat(baseContext, "My audio")
         getIntentMethod()
         onVolumeBarChange()
@@ -88,6 +92,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     override fun onResume() {
         var intent = Intent(this, MusicService::class.java)
         bindService(intent, this, Context.BIND_AUTO_CREATE)
+        backBtnClick()
         shuffleBtnClick()
         prevBtnClick()
         autoNext()
@@ -104,6 +109,11 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         editor?.apply()
         unbindService(this)
         stopRotateSongImage()
+    }
+    private fun backBtnClick(){
+        backBtn?.setOnClickListener {
+            this.onBackPressed()
+        }
     }
     private fun getIntentMethod(){
         if(!flag) {
@@ -222,12 +232,12 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         repeatButton.setOnClickListener{
             if(isRepeat){
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
-                    repeatButton.setColorFilter(Color.BLACK)
+                    repeatButton.setColorFilter(Color.WHITE)
                 }
                 isRepeat = false
             }
             else{
-                repeatButton.setColorFilter(Color.BLUE)
+                repeatButton.setColorFilter(Color.parseColor("#E45D32D5"))
                 isRepeat = true
             }
         }
@@ -235,11 +245,11 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     private fun shuffleBtnClick(){
         shuffleButton.setOnClickListener{
             if(isShuffle){
-                shuffleButton.setColorFilter(Color.BLACK)
+                shuffleButton.setColorFilter(Color.WHITE)
                 isShuffle = false
             }
             else{
-                shuffleButton.setColorFilter(Color.BLUE)
+                shuffleButton.setColorFilter(Color.parseColor("#E45D32D5"))
                 isShuffle = true
             }
         }

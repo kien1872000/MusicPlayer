@@ -262,10 +262,12 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
                 position = (position until playlist_songs.size).random()
             }
         }
-        Log.d("BBBaA", "yes sir ${playlist_songs_listView.size}")
+        Log.d("BBBaA", "yes sir $position")
         stopWaveBar()
-        playlist_songs_listView[position].song_playlist_vumeter.resume(true)
-        playlist_songs_listView[position].song_playlist_vumeter.visibility = View.VISIBLE
+        if(position<playlist_songs_listView.size) {
+            playlist_songs_listView[position].song_playlist_vumeter.resume(true)
+            playlist_songs_listView[position].song_playlist_vumeter.visibility = View.VISIBLE
+        }
 //        if(position>=musicService!!.musicFiles.size) passDataToMusicService()
         musicService!!.stop()
         musicService!!.release()
@@ -297,8 +299,10 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
             }
         }
         stopWaveBar()
-        playlist_songs_listView[position].song_playlist_vumeter.resume(true)
-        playlist_songs_listView[position].song_playlist_vumeter.visibility = View.VISIBLE
+        if(position<playlist_songs_listView.size) {
+            playlist_songs_listView[position].song_playlist_vumeter.resume(true)
+            playlist_songs_listView[position].song_playlist_vumeter.visibility = View.VISIBLE
+        }
         musicService!!.stop()
         musicService!!.release()
         uri = Uri.parse(playlist_songs[position].path)

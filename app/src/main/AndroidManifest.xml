@@ -20,10 +20,14 @@
         android:name=".ApplicationClass"
         android:theme="@style/Theme.MusicPlayer"
         android:value="AppGlideModule">
-        <activity android:name=".Activities.PlaylistDetailActivity"></activity>
-        <activity android:name=".Activities.AlbumDetailActivity" />
-        <activity android:name=".Activities.PlayerActivity" />
-        <activity android:name=".Activities.MainActivity">
+        <activity android:name=".Activities.PlaylistDetailActivity"
+            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"/>
+        <activity android:name=".Activities.AlbumDetailActivity"
+            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"/>
+        <activity android:name=".Activities.PlayerActivity"
+            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"/>
+        <activity android:name=".Activities.MainActivity"
+            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
