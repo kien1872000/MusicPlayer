@@ -70,7 +70,6 @@ class SongSuggestFragment(var onAcceptClick: OnAcceptClickListener?, var songsIn
                 }
             }
             for(index in 0 until (songsSuggest.size) ) {checkList.add(false)}
-            Log.d("kkkkk", "song_sugges: ${songsSuggest.size}, checkList: ${checkList.size}")
         }
     }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

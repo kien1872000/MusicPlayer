@@ -1,22 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:vumeter="http://schemas.android.com/apk/res-auto"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
+    android:layout_margin="3dp"
     android:layout_height="wrap_content">
     <ImageView
         android:layout_marginLeft="10dp"
-        android:layout_marginTop="10dp"
+        android:layout_centerVertical="true"
         android:id="@+id/song_playlist_image"
         android:layout_width="50dp"
         android:layout_height="50dp"/>
     <TextView
+        android:layout_toEndOf="@id/song_playlist_image"
         android:id="@+id/song_playlist_name"
-        android:layout_width="wrap_content"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="30dp"
         android:layout_marginTop="10dp"
-        android:gravity="center"
         android:textSize="20dp"
         android:textColor="#C60B0B"
         android:ellipsize="end"
@@ -25,20 +26,24 @@
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:src="@drawable/trash"
+        android:layout_marginRight="20dp"
+        android:layout_centerVertical="true"
+        android:layout_toStartOf="@id/song_playlist_vumeter"
         android:id="@+id/song_playlist_delete_btn"
-        android:layout_marginLeft="30dp"/>
+        android:layout_marginLeft="20dp"/>
     <io.gresse.hugo.vumeterlibrary.VuMeterView
         android:layout_width="30dp"
         android:visibility="invisible"
         android:layout_height="30dp"
         android:id="@+id/song_playlist_vumeter"
-        android:layout_marginRight="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_alignParentEnd="true"
+        android:layout_centerHorizontal="true"
         vumeter:vumeter_stopSize="5dp"
         vumeter:vumeter_speed="10"
         vumeter:vumeter_blockNumber="5"
         vumeter:vumeter_blockSpacing="20dp"
-        vumeter:vumeter_backgroundColor="#33b5e5"
-        vumeter:vumeter_startOff="false"/>
+        vumeter:vumeter_backgroundColor="#33b5e5" />
 
 
-</LinearLayout>
+</RelativeLayout>

@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.size
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayer.Adapters.SongAdapter
@@ -36,7 +37,7 @@ class AllSongFragment : Fragment() {
     ): View? {
         var rootView = inflater.inflate(R.layout.fragment_all_song, container, false)
         all_song_recyclerView = rootView.findViewById(R.id.all_songs_listView)
-        all_song_recyclerView?.setHasFixedSize(true);
+        all_song_recyclerView?.setHasFixedSize(true)
         if(MainActivity.song_list.size>=1){
             songAdapter = SongAdapter(activity!!,  MainActivity.song_list, "allSongs")
             var layoutManager: LinearLayoutManager = LinearLayoutManager(activity)

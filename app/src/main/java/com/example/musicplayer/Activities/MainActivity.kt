@@ -51,8 +51,6 @@ class MainActivity : AppCompatActivity() {
                     var duration: String = cusor.getString(3)
                     var path: String = cusor.getString(4)
                     var song: Song = Song(title, album, path, artists, duration)
-
-                    Log.d("Artists " + album, "name "+ title)
                     tempMusicList.add(song)
                 }
                 cusor.close()
@@ -104,7 +102,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.d("Hello mother fucker", "ff")
         var editor: SharedPreferences.Editor? = getSharedPreferences(MiniPlayer.LAST_PLAYED_SONG, Context.MODE_PRIVATE).edit()
         editor?.putBoolean(MiniPlayer.START_PLAYER_ACTIVITY, false)
         editor?.apply();

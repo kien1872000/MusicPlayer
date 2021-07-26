@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/black"
     android:orientation="vertical"
     tools:context=".Activities.PlaylistDetailActivity">
     <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
@@ -29,6 +30,7 @@
         android:text="Không có bài hát nào"
         android:textSize="30dp"
         android:gravity="center"
+        android:textColor="@color/white"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="25dp"/>
@@ -37,7 +39,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
         android:gravity="center"
-        android:background="#C5AEED">
+        >
 
         <ImageView
             android:id="@+id/playlist_shuffleButton"
@@ -85,5 +87,5 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/playlist_songs_listView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="wrap_content"/>
 </LinearLayout>

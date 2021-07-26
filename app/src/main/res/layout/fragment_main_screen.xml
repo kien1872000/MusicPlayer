@@ -2,67 +2,61 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="horizontal">
-
-    <ListView
-        android:id="@+id/listView"
+    android:layout_height="match_parent">
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="274dp" />
+        android:layout_height="match_parent">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <androidx.recyclerview.widget.RecyclerView
+                android:layout_marginTop="20dp"
+                android:id="@+id/category_list"
+                android:layout_alignParentTop="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/recent_text"
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_below="@+id/category_list"
+                android:layout_marginBottom="20dp"
+                android:textStyle="bold"
+                android:text="Nghe gần đây"
+                android:textSize="30dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recent_list"
+                android:layout_below="@+id/recent_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+            <TextView
+                android:id="@+id/listen_a_lot_text"
+                android:layout_marginStart="20dp"
+                android:layout_below="@+id/recent_list"
+                android:textStyle="bold"
+                android:text="Nghe nhiều"
+                android:layout_marginBottom="20dp"
+                android:textSize="30sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/listen_a_lot_list"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/listen_a_lot_text"
+                />
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:id="@+id/fragment_bottom_player_main_screen"/>
 
-    <TextView
-        android:id="@+id/recent_text"
-        android:layout_marginLeft="20dp"
-        android:layout_marginBottom="-34dp"
-        android:textStyle="bold"
-        android:text="Recent"
-        android:textSize="30dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        </RelativeLayout>
 
-        android:layout_alignBottom="@+id/listView"/>
-       />
-    <GridView
-        android:id="@+id/recent_list"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_alignBottom="@id/recent_text"
-        android:layout_marginBottom="-34dp"
-        />
-    <TextView
-        android:id="@+id/listen_a_lot_list"
-        android:layout_marginLeft="20dp"
-        android:layout_marginBottom="-34dp"
-        android:textStyle="bold"
-        android:text="Listen a lot"
-        android:textSize="30dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/recent_list"
+    </ScrollView>
 
-        />
-    <GridView
-        android:id="@+id/_list"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_alignBottom="@+id/listen_a_lot_list"
-        android:layout_marginBottom="-34dp"
-        />
-<!--    <FrameLayout-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_alignParentBottom="true"-->
-<!--        android:id="@+id/fragment_bottom_player">-->
-<!--        <fragment-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            tools:layout="@layout/fragment_mini_player"-->
-<!--            android:name="com.example.musicplayer.Fragments.MiniPlayerFragment"/>-->
-<!--    </FrameLayout>-->
-    <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:id="@+id/fragment_bottom_player_main_screen"/>
 
 </RelativeLayout>

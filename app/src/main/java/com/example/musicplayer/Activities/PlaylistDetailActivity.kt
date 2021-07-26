@@ -1,5 +1,6 @@
 package com.example.musicplayer.Activities
 
+import android.animation.ObjectAnimator
 import android.app.AlertDialog
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -7,49 +8,43 @@ import android.content.*
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.media.MediaMetadataRetriever
-import android.media.MediaPlayer
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.IBinder
 import android.support.v4.media.session.MediaSessionCompat
 import android.util.Log
 import android.view.View
-import android.view.animation.AnimationUtils
+import android.view.animation.Animation
+import android.view.animation.LinearInterpolator
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.view.get
 import androidx.core.view.iterator
 import androidx.core.view.size
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayer.*
 import com.example.musicplayer.Adapters.PlaylistDetailAdapter
 import com.example.musicplayer.Fragments.PlaylistFragment
 import com.example.musicplayer.Fragments.SongSuggestFragment
 import com.example.musicplayer.Models.Song
-import kotlinx.android.synthetic.main.activity_player.*
-import kotlinx.android.synthetic.main.activity_player.positionBar
-import kotlinx.android.synthetic.main.activity_player.volumeBar
+import kotlinx.android.synthetic.*
 import kotlinx.android.synthetic.main.activity_playlist_detail.*
 import kotlinx.android.synthetic.main.fragment_playlist.*
-import kotlinx.android.synthetic.main.fragment_song_playing.*
 import kotlinx.android.synthetic.main.song.*
-import kotlinx.android.synthetic.main.song.song_image
 import kotlinx.android.synthetic.main.song_playlist_item.view.*
-import kotlin.math.log
 
 class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickListener, ServiceConnection, OnPlaylistDetailClickListener {
-    companion object{
-        var playlist_songs = ArrayList<Song>()
-    }
+    private var playlist_songs: ArrayList<Song> = ArrayList<Song>()
     private var position = 0
-   // private var mediaPlayer: MediaPlayer? = null
+    private var anim: ObjectAnimator? = null
+    private var playlistDetailAdapter: PlaylistDetailAdapter? = null
     private var play_list_name: String? = null
     private var flag = false
     private var isRepeat = false
     private var isShuffle = false
     private var uri: Uri? = null
-    private var playlistDetailAdapter: PlaylistDetailAdapter? = null
     private var mediaSessionCompat: MediaSessionCompat? = null
     private var musicService: MusicService? = null
     private var isBound = false;
@@ -57,20 +52,30 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_playlist_detail)
+        setRotateSongImage()
         mediaSessionCompat = MediaSessionCompat(baseContext, "My audio")
         getIntentMethod()
         if(playlist_songs.isNotEmpty()) {
+            val layoutManager = LinearLayoutManager(this)
+            layoutManager.orientation = LinearLayoutManager.VERTICAL
+            playlist_songs_listView!!.layoutManager = layoutManager
+            playlistDetailAdapter = PlaylistDetailAdapter(this, playlist_songs, this)
+            playlist_songs_listView!!.adapter = playlistDetailAdapter
+            playlist_songs_listView!!.setHasFixedSize(true)
+            anim!!.start()
             bindMusicService()
         }
 //        if(playlist_songs.size>=1){
-        playlistDetailAdapter = PlaylistDetailAdapter(this, playlist_songs, this)
-        var layoutManager = LinearLayoutManager(this)
-        layoutManager.orientation = LinearLayoutManager.VERTICAL
-        playlist_songs_listView?.layoutManager = layoutManager
-        playlist_songs_listView?.adapter = playlistDetailAdapter
-        playlist_songs_listView?.setHasFixedSize(true)
+
 //       }
     }
+
+//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+//        super.onActivityResult(requestCode, resultCode, data)
+//        if(requestCode==1) {
+//            playlistDetailAdapter!!.notifyDataSetChanged()
+//        }
+//    }
     private fun getIntentMethod(){
         if(!flag){
             flag = true
@@ -78,7 +83,6 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         }
         playlistPosition = intent.getIntExtra("playlistPosition", -1);
         initPlaylist()
-
 
     }
     private fun setImage(uri: String){
@@ -99,9 +103,16 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
                 playlist_songs.add(MainActivity.song_list[1])
                 playlist_songs.add(MainActivity.song_list[2])
                 playlist_songs.add(MainActivity.song_list[3])
+                playlist_songs.add(MainActivity.song_list[4])
+                playlist_songs.add(MainActivity.song_list[5])
+                playlist_songs.add(MainActivity.song_list[8])
+                playlist_songs.add(MainActivity.song_list[9])
+
             }
             1 ->{
                 playlist_songs.add(MainActivity.song_list[4])
+                playlist_songs.add(MainActivity.song_list[15])
+
             }
         }
     }
@@ -113,12 +124,13 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         return art
     }
     override fun onClickItem(position: Int) {
+        val tempPosition = this.position
         this.position = position
-        stopWaveBar()
-        playlist_songs_listView[position].song_playlist_vumeter.resume(true)
-        playlist_songs_listView[position].song_playlist_vumeter.visibility = View.VISIBLE
         showNotification(R.drawable.stop, R.drawable.ic_pause)
         if(musicService!=null) {
+            playlistDetailAdapter!!.notifyItemChanged(tempPosition)
+            playlistDetailAdapter!!.selectedPosition = position
+            playlistDetailAdapter!!.notifyItemChanged(position)
             if(musicService!!.isPlaying()){
                 musicService!!.stop()
                 musicService!!.release()
@@ -144,7 +156,12 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
        confirmDelete(position)
     }
     private fun deletePlaylistItem(position: Int) {
+        val tempPosition = position
+        Log.d("ggggf",
+            position.toString()
+        )
         playlist_songs.removeAt(position)
+        playlist_songs_listView.adapter!!.notifyItemRemoved(position)
         musicService!!.musicFiles = playlist_songs;
         if(position<this.position) this.position--
         else if(position==this.position) {
@@ -158,7 +175,6 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
 
         }
         musicService!!.position = this.position
-        playlistDetailAdapter!!.notifyDataSetChanged()
     }
     private fun deletePlaylist() {
         onBackPressed()
@@ -255,22 +271,27 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         }
     }
     override fun playNext(){
-        Toast.makeText(this, "PlayNext Hế lồ", Toast.LENGTH_SHORT).show()
-        if(!isRepeat){
-            position = (position+1)% playlist_songs.size
-            if(isShuffle){
+//        Toast.makeText(this, "PlayNext Hế lồ", Toast.LENGTH_SHORT).show()
+        playlistDetailAdapter!!.notifyItemChanged(position)
+        musicService!!.reset()
+        if(!isRepeat) {
+            position = (position + 1) % playlist_songs.size
+            if (isShuffle) {
                 position = (position until playlist_songs.size).random()
             }
         }
-        Log.d("BBBaA", "yes sir $position")
-        stopWaveBar()
-        if(position<playlist_songs_listView.size) {
-            playlist_songs_listView[position].song_playlist_vumeter.resume(true)
-            playlist_songs_listView[position].song_playlist_vumeter.visibility = View.VISIBLE
-        }
-//        if(position>=musicService!!.musicFiles.size) passDataToMusicService()
-        musicService!!.stop()
-        musicService!!.release()
+       playlist_songs_listView.smoothScrollToPosition(position)
+        playlistDetailAdapter!!.selectedPosition = position
+        playlistDetailAdapter!!.notifyItemChanged(position)
+//        stopWaveBar()
+//
+//
+//        if(position<playlist_songs_listView.size) {
+//            playlist_songs_listView[position].song_playlist_vumeter.resume(true)
+//            playlist_songs_listView[position].song_playlist_vumeter.visibility = View.VISIBLE
+//        }
+        if(position>=musicService!!.musicFiles.size) passDataToMusicService()
+        anim!!.start()
         uri = Uri.parse(playlist_songs[position].path)
         musicService!!.createMediaPlayer(position)
         setImage(uri.toString())
@@ -278,31 +299,21 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         showNotification(R.drawable.stop, R.drawable.ic_pause)
         playlist_name_detail.text = playlist_songs[position].name
         musicService!!.start()
-        musicService?.mediaPlayer?.setOnCompletionListener {
-            playNext()
-        }
-        MiniPlayer.PATH_TO_FRAG = playlist_songs[position].path;
-        MiniPlayer.SONG_NAME_TO_FRAG = playlist_songs[position].name;
-        MiniPlayer.SONG_ARTIST_TO_FRAG = playlist_songs[position].artist;
-    }
-    private fun stopWaveBar() {
-        for(view in playlist_songs_listView) {
-            view.song_playlist_vumeter.visibility = View.INVISIBLE
-        }
+        MiniPlayer.PATH_TO_FRAG = playlist_songs[position].path
+        MiniPlayer.SONG_NAME_TO_FRAG = playlist_songs[position].name
+        MiniPlayer.SONG_ARTIST_TO_FRAG = playlist_songs[position].artist
+        autoNext()
     }
     override fun playPrev(){
-        Toast.makeText(this, "PlayPrev Hế lồ", Toast.LENGTH_SHORT).show()
+//        Toast.makeText(this, "PlayPrev Hế lồ", Toast.LENGTH_SHORT).show()
+        playlistDetailAdapter!!.notifyItemChanged(position)
         if(!isRepeat){
             position = if(position>0)  position -1 else playlist_songs.size-1
             if(isShuffle){
                 position = (0..position).random()
             }
         }
-        stopWaveBar()
-        if(position<playlist_songs_listView.size) {
-            playlist_songs_listView[position].song_playlist_vumeter.resume(true)
-            playlist_songs_listView[position].song_playlist_vumeter.visibility = View.VISIBLE
-        }
+        anim!!.start()
         musicService!!.stop()
         musicService!!.release()
         uri = Uri.parse(playlist_songs[position].path)
@@ -312,9 +323,13 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         showNotification(R.drawable.stop, R.drawable.ic_pause)
         playlist_name_detail.text = playlist_songs[position].name
         musicService!!.start()
+        playlist_songs_listView.smoothScrollToPosition(position)
+        playlistDetailAdapter!!.selectedPosition = position
+        playlistDetailAdapter!!.notifyItemChanged(position)
         MiniPlayer.PATH_TO_FRAG = playlist_songs[position].path;
         MiniPlayer.SONG_NAME_TO_FRAG = playlist_songs[position].name;
         MiniPlayer.SONG_ARTIST_TO_FRAG = playlist_songs[position].artist;
+        autoNext()
     }
     private fun playRepeat(){
         if(!isRepeat){
@@ -339,21 +354,24 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
 
     }
     override fun playPause(){
-        Toast.makeText(this, "PlayPause hế lồ", Toast.LENGTH_SHORT).show()
+//        Toast.makeText(this, "PlayPause hế lồ", Toast.LENGTH_SHORT).show()
         if(musicService!=null) {
             if(musicService!!.isPlaying()){
-                playlist_songs_listView[position].song_playlist_vumeter.pause()
+                anim!!.pause()
                 musicService!!.pause()
                 showNotification(R.drawable.play, R.drawable.ic_play)
                 playlist_playButton.setImageResource(R.drawable.play)
                 MiniPlayer.PLAY_PAUSE = "Pause"
+                playlistDetailAdapter!!.isPause = true
+                playlistDetailAdapter!!.notifyItemChanged(position)
             }
             else{
-                playlist_songs_listView[position].song_playlist_vumeter.resume(true)
+                anim!!.resume()
                 musicService!!.start()
                 showNotification(R.drawable.stop, R.drawable.ic_pause)
                 playlist_playButton.setImageResource(R.drawable.stop)
                 MiniPlayer.PLAY_PAUSE = "Play"
+                playlistDetailAdapter!!.notifyItemChanged(position)
             }
         }
         MiniPlayer.PATH_TO_FRAG = playlist_songs[position].path;
@@ -371,17 +389,26 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         autoNext()
         addSong()
     }
-
     private fun showDialog(){
         val newFragment = SongSuggestFragment(this, playlist_songs)
         newFragment.show(supportFragmentManager, "add song dialog")
     }
 
     override fun onClick(songs: ArrayList<Song>) {
-        playlist_songs.addAll(songs);
-        playlistDetailAdapter!!.notifyDataSetChanged()
-        musicService?.musicFiles = playlist_songs
-        if(musicService==null) bindMusicService()
+        val start = playlist_songs.size
+        playlistDetailAdapter!!.songs.addAll(songs)
+        playlist_songs_listView.setHasFixedSize(false)
+        playlistDetailAdapter!!.notifyItemRangeInserted(start, songs.size)
+        playlist_songs_listView.setHasFixedSize(true)
+
+
+//        playlist_songs_listView.adapter!!.notifyItemInserted(lastSizeOfPlaylist)
+//        playlist_songs_listView.adapter!!.notifyItemRangeInserted(lastSizeOfPlaylist, songs.size)
+//        playlist_songs_listView.adapter!!.notifyDataSetChanged()
+        //Log.d("3333", playlist_songs_listView!!.get(playlist_songs.size-1).song_playlist_name.text.toString())
+        musicService!!.musicFiles = playlist_songs
+
+
 //        if(playlist_songs.isNotEmpty()){
 //
 //            if(!isBound){
@@ -401,7 +428,7 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
 //        }
     }
     private fun showNotification(playPauseBtn: Int, playNoti: Int){
-        var intent = Intent(this,PlayerActivity::class.java)
+        var intent = Intent(this,PlaylistDetailAdapter::class.java)
         var contentIntent = PendingIntent.getActivity(this, 0,intent, 0)
 
         var prevIntent = Intent(this, NotificationReceiver::class.java).setAction(ApplicationClass.ACTION_PREVIOUS)
@@ -434,6 +461,9 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         setAutoCancel(true)
         var notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(0, nBuilder.build())
+        var editor: SharedPreferences.Editor? = getSharedPreferences(MiniPlayer.LAST_PLAYED_SONG, Context.MODE_PRIVATE).edit()
+        editor?.putString(ServiceCommunication.SENDER_ACTIVITY, ServiceCommunication.PLAYLIST_DETAIL_ACTIVITY)
+        editor?.apply()
     }
     private fun getAlbumArt(uri: String): ByteArray? {
         val retriever = MediaMetadataRetriever()
@@ -452,24 +482,27 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         musicService = myBinder.getService()
         musicService?.actionPlaying =null;
         musicService?.setOnPlaylistDetailClick(this)
-        if(playlist_songs.isNotEmpty()){
-          if(!isBound) {
-              playlist_songs_listView[0].song_playlist_vumeter.visibility = View.VISIBLE
-              showNotification(R.drawable.stop, R.drawable.ic_pause)
-              uri = Uri.parse(playlist_songs[0].path)
-              setImage(uri.toString())
-              playlist_name_detail.text = playlist_songs[0].name
-              musicService!!.stop()
-              musicService!!.release()
-              //mediaPlayer = MediaPlayer.create(applicationContext, uri)
-              musicService!!.createMediaPlayer(position)
-              musicService!!.start()
-              isBound = true;
-          }
-        }
+        startPlaylist()
         Toast.makeText(this, "connected"+ musicService, Toast.LENGTH_LONG).show()
         autoNext()
 
+    }
+    private fun startPlaylist() {
+        if(playlist_songs.isNotEmpty()){
+            if(!isBound) {
+                showNotification(R.drawable.stop, R.drawable.ic_pause)
+                uri = Uri.parse(playlist_songs[0].path)
+                setImage(uri.toString())
+                playlist_name_detail.text = playlist_songs[0].name
+                musicService!!.stop()
+                musicService!!.release()
+                //mediaPlayer = MediaPlayer.create(applicationContext, uri)
+                musicService!!.createMediaPlayer(position)
+                musicService!!.start()
+                if(playlist_songs_listView!=null)
+                isBound = true;
+            }
+        }
     }
     private fun passDataToMusicService() {
         intent = Intent(this, MusicService::class.java)
@@ -489,12 +522,26 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
     }
     override fun onPause() {
         super.onPause()
-        var editor: SharedPreferences.Editor? = getSharedPreferences(MiniPlayer.LAST_PLAYED_SONG, Context.MODE_PRIVATE).edit()
-        editor?.putString(ServiceCommunication.SENDER_ACTIVITY, ServiceCommunication.PLAYLIST_DETAIL_ACTIVITY)
-        editor?.apply()
+//        val intent = Intent(this,MainActivity::class.java)
+//        startActivityForResult(intent, 1)
         if(isBound) {
             unbindService(this)
             isBound = false;
         }
     }
+    private fun setRotateSongImage() {
+        anim = ObjectAnimator.ofFloat(playlist_image_detail, "rotation", 0F, 360F)
+        anim!!.duration = 7500
+        anim!!.repeatCount = Animation.INFINITE
+        anim!!.interpolator = LinearInterpolator()
+        anim!!.repeatMode = ObjectAnimator.RESTART
+    }
+//    override fun onBackPressed() {
+//        super.onBackPressed()
+//        playlist_songs_listView.adapter = null
+//        playlist_songs_listView.layoutManager = null
+//        playlistDetailAdapter = null
+//    }
+
+
 }

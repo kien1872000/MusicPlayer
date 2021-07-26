@@ -20,10 +20,12 @@ class NotificationReceiver: BroadcastReceiver() {
         if(actionName!=null) {
             when(actionName){
                 ACTION_PLAY -> {
+                    Log.d("9981", sender.toString())
                     serviceIntent.putExtra(ServiceCommunication.MEDIA_PLAYER_ACTION, ServiceCommunication.ACTION_PLAY )
                     context?.startService(serviceIntent)
                 }
                 ACTION_NEXT -> {
+                    Log.d("9982", sender.toString())
                     serviceIntent.putExtra(ServiceCommunication.MEDIA_PLAYER_ACTION, ServiceCommunication.ACTION_NEXT)
                     context?.startService(serviceIntent)
                 }

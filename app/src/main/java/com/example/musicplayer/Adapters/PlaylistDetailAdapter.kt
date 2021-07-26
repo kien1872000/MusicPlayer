@@ -1,25 +1,36 @@
 package com.example.musicplayer.Adapters
 
-import android.R.attr.data
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.graphics.Color.WHITE
 import android.media.MediaMetadataRetriever
+import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayer.Models.Song
 import com.example.musicplayer.OnSongClick
 import com.example.musicplayer.R
 import io.gresse.hugo.vumeterlibrary.VuMeterView
 import kotlinx.android.synthetic.main.song_playlist_item.view.*
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class PlaylistDetailAdapter(var context: Context?, var songs: ArrayList<Song>, var onSongClick: OnSongClick?):
     RecyclerView.Adapter<PlaylistDetailAdapter.ViewHolder>(){
+    var selectedPosition = 0
+    private var isFirst = true
+    var lastPosition = 0
+    var isPause = false
+     var i = 0
     class ViewHolder(view: View): RecyclerView.ViewHolder(view)  {
         var song_name: TextView
         var song_image: ImageView
@@ -42,9 +53,17 @@ class PlaylistDetailAdapter(var context: Context?, var songs: ArrayList<Song>, v
         return songs.size
     }
 
+    override fun onViewAttachedToWindow(holder: ViewHolder) {
+        super.onViewAttachedToWindow(holder)
+    }
+    @SuppressLint("ClickableViewAccessibility")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+       lastPosition = position
        holder.delete_btn.setImageResource(R.drawable.trash)
        holder.song_name.text = songs[position].name
+       holder.wave_bar.visibility = View.INVISIBLE
+       holder.itemView.setBackgroundColor(Color.BLACK)
+       holder.wave_bar.resume(true)
        var image = getSongArt(songs[position].path)
        var bitmap = image?.size?.let { BitmapFactory.decodeByteArray(image, 0, it) }
        if(bitmap==null){
@@ -54,17 +73,48 @@ class PlaylistDetailAdapter(var context: Context?, var songs: ArrayList<Song>, v
            holder.song_image.setImageBitmap(bitmap)
        }
 
-        holder.itemView.setOnClickListener{
-          onSongClick!!.onClickItem(position)
-
+        if(position == selectedPosition){
+            holder.itemView.setBackgroundColor(Color.GRAY)
+//            holder.itemView.isSelected = true
+            val sdf = SimpleDateFormat("dd/M/yyyy hh:mm:ss")
+            val currentDate = sdf.format(Date())
+            isFirst = false
+            holder.wave_bar.visibility = View.VISIBLE
         }
-        holder.itemView.song_playlist_delete_btn.setOnClickListener{
-            onSongClick!!.onDeleteItem(position)
+        holder.itemView.setOnClickListener{
+            onSongClick!!.onClickItem(position)
+        }
+
+        if(isPause) {
+            isPause = false
+            holder.wave_bar.pause()
+        }
+        else {
+            holder.wave_bar.resume(true)
+        }
+
+        holder.delete_btn.setOnTouchListener { v, event ->
+            Log.d("mmm444", "yes $position")
+            when(event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    holder.delete_btn.setColorFilter(Color.parseColor("#8097a3"))
+                }
+                MotionEvent.ACTION_UP -> {
+                    holder.delete_btn.colorFilter = null
+                    onSongClick!!.onDeleteItem(position)
+                }
+
+            }
+            true
         }
     }
-    fun update(data: ArrayList<Song>) {
-        songs.clear()
-        songs.addAll(data)
+
+    override fun getItemViewType(position: Int): Int {
+        return super.getItemViewType(position)
+    }
+    fun addList(songsAddList: ArrayList<Song>) {
+        val start = songs.size
+        songs.addAll(songsAddList)
         notifyDataSetChanged()
     }
     private fun getSongArt(uri: String): ByteArray?{

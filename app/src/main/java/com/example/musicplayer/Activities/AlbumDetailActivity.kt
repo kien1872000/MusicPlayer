@@ -39,7 +39,6 @@ class AlbumDetailActivity : AppCompatActivity() {
     }
     private fun getIntentMethod(){
         position = intent.getIntExtra("position", -1)
-        Log.d("1111 ", position.toString())
         uri = Uri.parse(AlbumFragment.album_list[position].path)
         var image = getAlbumArt(uri.toString())
         val bitmap = image?.size?.let { BitmapFactory.decodeByteArray(image, 0, it) }

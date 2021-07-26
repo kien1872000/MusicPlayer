@@ -1,37 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:vumeter="http://schemas.android.com/apk/res-auto"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content">
-    <ImageView
-        android:layout_marginLeft="10dp"
+    <androidx.cardview.widget.CardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/song_image_parent"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="5dp"
         android:layout_marginTop="10dp"
-        android:id="@+id/song_image"
-        android:layout_width="50dp"
-        android:layout_height="50dp"/>
+        android:layout_centerHorizontal="true"
+        app:cardCornerRadius="10dp"
+        >
+        <ImageView
+            android:id="@+id/song_image"
+            android:src="@drawable/song_image"
+            android:layout_width="70dp"
+            android:layout_height="70dp"/>
+    </androidx.cardview.widget.CardView>
+
     <TextView
         android:id="@+id/song_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="30dp"
+        android:layout_toEndOf="@+id/song_image_parent"
+        android:layout_marginStart="30dp"
         android:layout_marginTop="10dp"
-        android:gravity="center"
-        android:textSize="20dp"
-        android:textColor="#C60B0B"
+        android:textSize="20sp"
+        android:textColor="@color/white"
+        android:text="Song name"
         android:ellipsize="end"
         android:maxLines="1"/>
-        <io.gresse.hugo.vumeterlibrary.VuMeterView
-        android:layout_width="30dp"
-        android:visibility="invisible"
-        android:layout_height="30dp"
-        android:id="@+id/vumeter"
-        android:layout_marginRight="20dp"
-        vumeter:vumeter_stopSize="5dp"
-        vumeter:vumeter_speed="10"
-        vumeter:vumeter_blockNumber="5"
-        vumeter:vumeter_blockSpacing="20dp"
-        vumeter:vumeter_backgroundColor="#33b5e5"
-        vumeter:vumeter_startOff="false"/>
+     <TextView
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_toRightOf="@id/song_image_parent"
+         android:layout_below="@+id/song_name"
+         android:layout_marginStart="30dp"
+         android:textColor="#D6C4C4"
+         android:textSize="15dp"
+         android:layout_marginTop="5dp"
+         android:text="Artist name"/>
 
-</LinearLayout>
+</RelativeLayout>

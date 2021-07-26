@@ -87,6 +87,7 @@ class MusicService : Service() {
         mediaPlayer?.release()
     }
     fun clickNext() {
+        Log.d("EQQQ1", sender.toString())
         if(sender!=null){
             when(sender) {
                 ServiceCommunication.PLAYLIST_DETAIL_ACTIVITY -> onPlaylistDetailClickListener?.playNext()
@@ -175,6 +176,7 @@ class MusicService : Service() {
     fun createMediaPlayerWithPath(path: String) {
         var uriPath = Uri.parse(path)
         mediaPlayer = MediaPlayer.create(baseContext, uriPath)
+        mediaPlayer!!.start()
     }
 
     fun setCallBack(actionPlaying: ActionPlaying){

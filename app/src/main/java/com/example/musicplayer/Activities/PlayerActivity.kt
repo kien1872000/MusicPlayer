@@ -1,14 +1,12 @@
 package com.example.musicplayer.Activities
 
-import android.R.attr.*
-import android.animation.Animator
 import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.*
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.graphics.Matrix
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
@@ -17,23 +15,23 @@ import android.os.Handler
 import android.os.IBinder
 import android.support.v4.media.session.MediaSessionCompat
 import android.util.Log
+import android.view.MotionEvent
+import android.view.View
 import android.view.animation.Animation
 import android.view.animation.LinearInterpolator
 import android.view.animation.RotateAnimation
-import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
-import com.bumptech.glide.Glide
 import com.example.musicplayer.*
 import com.example.musicplayer.ApplicationClass.Companion.ACTION_NEXT
 import com.example.musicplayer.ApplicationClass.Companion.ACTION_PLAY
 import com.example.musicplayer.ApplicationClass.Companion.ACTION_PREVIOUS
 import com.example.musicplayer.ApplicationClass.Companion.CHANNEL_ID_2
+import com.example.musicplayer.Fragments.MainScreenFragment
 import com.example.musicplayer.Models.Song
 import kotlinx.android.synthetic.main.activity_player.*
-import kotlinx.android.synthetic.main.fragment_song_playing.*
 import kotlinx.android.synthetic.main.fragment_song_playing.elapsedTimeLabel
 import kotlinx.android.synthetic.main.fragment_song_playing.positionBar
 import kotlinx.android.synthetic.main.fragment_song_playing.remainingTimeLabel
@@ -61,58 +59,50 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         stopRotateSongImage()
         repeatButton.setColorFilter(Color.WHITE)
         shuffleButton.setColorFilter(Color.WHITE)
+        backButton.setColorFilter(Color.WHITE)
         mediaSessionCompat = MediaSessionCompat(baseContext, "My audio")
         getIntentMethod()
         onVolumeBarChange()
         onPositionBarChange()
+    }
 
-//        this@PlayerActivity.runOnUiThread(
-//            object : Runnable {
-//                override fun run() {
-//                    var currentPosition = musicService!!.getCurrentPosition()
-//                    // Update positionBar
-//                    positionBar?.progress = currentPosition
-//                    // Update Labels
-//                    var elapsedTime = createTimeLabel(currentPosition)
-//                    elapsedTimeLabel?.text = elapsedTime
-//
-//                    var remainingTime = createTimeLabel(totalTime - currentPosition)
-//                    remainingTimeLabel?.text = "-$remainingTime"
-//                    handle.postDelayed(this, 1000)
-//                }
-//            }
-//        )
-    }
-    private fun playThread(){
-        var playThread = Thread{
-            playBtnClick()
-        }
-        playThread.start()
-    }
     override fun onResume() {
         var intent = Intent(this, MusicService::class.java)
         bindService(intent, this, Context.BIND_AUTO_CREATE)
         backBtnClick()
         shuffleBtnClick()
-        prevBtnClick()
+        repeatBtnClick()
         autoNext()
+        prevBtnClick()
         nextBtnClick()
         playBtnClick()
-        repeatBtnClick()
         super.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        var editor: SharedPreferences.Editor? = getSharedPreferences(MiniPlayer.LAST_PLAYED_SONG, Context.MODE_PRIVATE).edit()
-        editor?.putString(ServiceCommunication.SENDER_ACTIVITY, ServiceCommunication.PLAYER_ACTIVITY)
-        editor?.apply()
+
         unbindService(this)
-        stopRotateSongImage()
+
     }
+    @SuppressLint("ClickableViewAccessibility")
     private fun backBtnClick(){
-        backBtn?.setOnClickListener {
-            this.onBackPressed()
+        backButton.setOnTouchListener { arg0, arg1 ->
+            when (arg1.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    backButton.setColorFilter(Color.parseColor("#a0acb2"))
+                }
+                MotionEvent.ACTION_CANCEL -> {
+                    backButton.setColorFilter(Color.WHITE)
+                    this.onBackPressed()
+                }
+                MotionEvent.ACTION_UP -> {
+                    backButton.setColorFilter(Color.WHITE)
+                    this.onBackPressed()
+
+                }
+            }
+            true
         }
     }
     private fun getIntentMethod(){
@@ -126,7 +116,10 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         if(category!=null&&category=="albumDetail"){
             musicItems = AlbumDetailActivity.songs
         }
-        else{
+        else if(category=="recent"){
+            musicItems = MainScreenFragment.recentSongList
+        }
+        else {
             musicItems = MainActivity.song_list
         }
         if(position>=0) {
@@ -147,18 +140,8 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
                 musicService!!.start()
             }
         }
-//        else{
-//            //mediaPlayer = MediaPlayer.create(applicationContext, uri)
-//            musicService!!.createMediaPlayer(position)
-//            musicService
-//            musicService!!.start()
-//        }
         showNotification(R.drawable.stop, R.drawable.ic_pause)
         passDataToMusicService()
-       // mediaPlayer!!.isLooping = true
-//        musicService!!.setVolume(0.5f, 0.5f)
-//        totalTime = musicService!!.getDuration()
-//        positionBar.max = totalTime
     }
     private fun onVolumeBarChange(){
         volumeBar.setOnSeekBarChangeListener(
@@ -213,27 +196,96 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         MiniPlayer.SONG_NAME_TO_FRAG = musicItems[position].name
         MiniPlayer.SONG_ARTIST_TO_FRAG = musicItems[position].artist
     }
+    @SuppressLint("ClickableViewAccessibility")
     private fun playBtnClick() {
-        playButton.setOnClickListener {
-            playPause()
+        playButton.setOnTouchListener { arg0, arg1 ->
+            when (arg1.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    playButton.setColorFilter(Color.parseColor("#99ddff"))
+                }
+                MotionEvent.ACTION_CANCEL -> {
+                    playPause()
+                    playButton.colorFilter = null
+                }
+                MotionEvent.ACTION_UP -> {
+                    playPause()
+                    playButton.colorFilter = null
+                }
+            }
+            true
         }
     }
+    @SuppressLint("ClickableViewAccessibility")
     private fun prevBtnClick(){
-        prevButton.setOnClickListener {
-            playPrev()
+        prevButton.setOnTouchListener { arg0, arg1 ->
+            when (arg1.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    prevButton.setColorFilter(Color.parseColor("#99ddff"))
+                }
+                MotionEvent.ACTION_UP -> {
+                    playPrev()
+                    prevButton.colorFilter = null
+                }
+            }
+            true
         }
     }
+    @SuppressLint("ClickableViewAccessibility")
     private fun nextBtnClick(){
-        nextButton.setOnClickListener {
-            playNext()
+        nextButton.setOnTouchListener { arg0, arg1 ->
+            when (arg1.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    nextButton.setColorFilter(Color.parseColor("#99ddff"))
+                }
+                MotionEvent.ACTION_CANCEL -> {
+                    playNext()
+                    nextButton.colorFilter = null
+                }
+                MotionEvent.ACTION_UP -> {
+                    playNext()
+                    nextButton.colorFilter = null
+                }
+            }
+            true
         }
     }
+    @SuppressLint("ClickableViewAccessibility")
     private fun repeatBtnClick(){
+        repeatButton.setOnTouchListener { arg0, arg1 ->
+            when (arg1.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    repeatButton.setColorFilter(Color.parseColor("#99ddff"))
+                }
+                MotionEvent.ACTION_CANCEL -> {
+                    playPrev()
+                    if(isRepeat){
+                        repeatButton.setColorFilter(Color.WHITE)
+                        isRepeat = false
+                    }
+                    else{
+                        repeatButton.setColorFilter(Color.parseColor("#E45D32D5"))
+                        isRepeat = true
+                    }
+                }
+                MotionEvent.ACTION_UP -> {
+                    playPrev()
+                    if(isRepeat){
+
+                        repeatButton.setColorFilter(Color.WHITE)
+                        isRepeat = false
+                    }
+                    else{
+                        repeatButton.setColorFilter(Color.parseColor("#E45D32D5"))
+                        isRepeat = true
+                    }
+                }
+            }
+            true
+        }
         repeatButton.setOnClickListener{
             if(isRepeat){
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
-                    repeatButton.setColorFilter(Color.WHITE)
-                }
+
+                repeatButton.setColorFilter(Color.WHITE)
                 isRepeat = false
             }
             else{
@@ -242,7 +294,38 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
             }
         }
     }
+    @SuppressLint("ClickableViewAccessibility")
     private fun shuffleBtnClick(){
+        shuffleButton.setOnTouchListener { arg0, arg1 ->
+            when (arg1.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    shuffleButton.setColorFilter(Color.parseColor("#99ddff"))
+                }
+                MotionEvent.ACTION_CANCEL -> {
+                    playPrev()
+                    if(isShuffle){
+                        shuffleButton.setColorFilter(Color.WHITE)
+                        isShuffle = false
+                    }
+                    else{
+                        shuffleButton.setColorFilter(Color.parseColor("#E45D32D5"))
+                        isShuffle = true
+                    }
+                }
+                MotionEvent.ACTION_UP -> {
+                    playPrev()
+                    if(isShuffle){
+                        shuffleButton.setColorFilter(Color.WHITE)
+                        isShuffle = false
+                    }
+                    else{
+                        shuffleButton.setColorFilter(Color.parseColor("#E45D32D5"))
+                        isShuffle = true
+                    }
+                }
+            }
+            true
+        }
         shuffleButton.setOnClickListener{
             if(isShuffle){
                 shuffleButton.setColorFilter(Color.WHITE)
@@ -260,7 +343,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         }
     }
     override fun playPrev(){
-        anim!!.resume()
+        anim!!.start()
         musicService!!.reset()
         if(!isRepeat){
             if(position>0) position--
@@ -278,7 +361,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
             song_image.setImageBitmap(bitmap)
         }
         else{
-            song_image.setBackgroundResource(R.drawable.song_image)
+            song_image.setImageResource(R.drawable.song_image)
         }
         song_name_text.text = musicItems[position].name
         singer_name_text.text = musicItems[position].artist
@@ -296,9 +379,10 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         MiniPlayer.PATH_TO_FRAG = musicItems[position].path
         MiniPlayer.SONG_NAME_TO_FRAG = musicItems[position].name
         MiniPlayer.SONG_ARTIST_TO_FRAG = musicItems[position].artist
+        autoNext()
     }
     override fun playNext(){
-        anim!!.resume()
+        anim!!.start()
         musicService!!.reset()
         if(!isRepeat){
             position = (position+1)%musicItems.size
@@ -325,12 +409,10 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         positionBar.max = totalTime
         playButton.setImageResource(R.drawable.stop)
         showNotification(R.drawable.stop, R.drawable.ic_pause)
-        musicService?.mediaPlayer?.setOnCompletionListener {
-            playNext()
-        }
         MiniPlayer.PATH_TO_FRAG = musicItems[position].path
         MiniPlayer.SONG_NAME_TO_FRAG = musicItems[position].name
         MiniPlayer.SONG_ARTIST_TO_FRAG = musicItems[position].artist
+        autoNext()
     }
     private fun getAlbumArt(uri: String): ByteArray? {
         val retriever = MediaMetadataRetriever()
@@ -385,7 +467,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         )
         autoNext()
     }
-    fun showNotification(playPauseBtn: Int, playNoti: Int){
+    private fun showNotification(playPauseBtn: Int, playNoti: Int){
         var intent = Intent(this,PlayerActivity::class.java)
         var contentIntent = PendingIntent.getActivity(this, 0,intent, 0)
 
@@ -419,6 +501,9 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         setAutoCancel(true)
         var notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(0, nBuilder.build())
+        var editor: SharedPreferences.Editor? = getSharedPreferences(MiniPlayer.LAST_PLAYED_SONG, Context.MODE_PRIVATE).edit()
+        editor?.putString(ServiceCommunication.SENDER_ACTIVITY, ServiceCommunication.PLAYER_ACTIVITY)
+        editor?.apply()
     }
     private fun passDataToMusicService() {
         intent = Intent(this, MusicService::class.java)
@@ -440,7 +525,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         rotateAnimation.duration = 7500
         rotateAnimation.repeatCount = Animation.INFINITE
         rotateAnimation.repeatMode
-        Log.d("BBBaA", "yes sir ${song_image.pivotX}")
         song_image.startAnimation(rotateAnimation)
     }
     private fun stopRotateSongImage() {

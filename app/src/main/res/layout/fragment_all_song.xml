@@ -3,13 +3,27 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:background="#131313"
     tools:context=".Fragments.AllSongFragment">
+    <EditText
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_width="match_parent"
+        android:id="@+id/search_song"
+        android:layout_alignParentTop="true"
+        android:imeOptions="actionSearch"
+        android:inputType="text"
+        android:hint="Tìm kiếm bài hát"
+        android:textColor="@color/white"
+        android:background="@drawable/border"
+        android:textColorHint="#BFBBBB"
+        android:layout_height="40dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/all_songs_listView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/search_song"
         android:layout_above="@+id/fragment_bottom_player"
         android:layout_marginBottom="15dp"
         android:maxLines="1" />

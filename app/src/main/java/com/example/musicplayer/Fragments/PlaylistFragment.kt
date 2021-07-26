@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.size
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayer.Activities.MainActivity
@@ -14,12 +15,12 @@ import com.example.musicplayer.Adapters.PlaylistAdapter
 import com.example.musicplayer.Models.Album
 import com.example.musicplayer.OnPlaylistItemChangeListener
 import com.example.musicplayer.R
+import kotlinx.android.synthetic.main.activity_playlist_detail.*
+import kotlinx.android.synthetic.main.fragment_playlist.*
 
 
 class PlaylistFragment : Fragment(), OnPlaylistItemChangeListener {
-    companion object{
-        var playlist_list = ArrayList<Album>()
-    }
+    private var playlist_list = ArrayList<Album>()
     private var playlistAdapter: PlaylistAdapter? = null
     private var playlist_recyclerView: RecyclerView? = null
 
@@ -44,6 +45,13 @@ class PlaylistFragment : Fragment(), OnPlaylistItemChangeListener {
             playlist_recyclerView?.adapter = playlistAdapter
         }
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        playlistAdapter = null
+        playlist_recyclerView!!.adapter = null
+        playlist_recyclerView = null
+    }
     private fun setPlaylistList(){
         playlist_list.clear()
         playlist_list.add(Album("Playlist 1", ""))
@@ -54,12 +62,11 @@ class PlaylistFragment : Fragment(), OnPlaylistItemChangeListener {
 
     override fun onResume() {
         super.onResume()
-        playlistAdapter!!.notifyDataSetChanged()
+       // playlistAdapter!!.notifyDataSetChanged()
     }
     override fun onDeletePlaylistItem(position: Int) {
         if(playlist_list.size>=1) {
             playlist_list.removeAt(position)
-            Log.d("zzzz", "Hế lồ")
         }
     }
 

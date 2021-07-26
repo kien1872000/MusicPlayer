@@ -120,6 +120,7 @@ class MiniPlayerFragment : Fragment(), ServiceConnection, OnMiniPlayerChangeList
             }
         }
         mini_player_next_btn?.setOnClickListener {
+
             playNextSelf()
         }
         mini_player_play_btn?.setOnClickListener {
@@ -151,7 +152,6 @@ class MiniPlayerFragment : Fragment(), ServiceConnection, OnMiniPlayerChangeList
     }
     override fun onPause() {
         super.onPause()
-        Log.d("T111", "He^lo")
         activity?.unbindService(this)
 
     }
@@ -161,7 +161,6 @@ class MiniPlayerFragment : Fragment(), ServiceConnection, OnMiniPlayerChangeList
 
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
         var binder = service as MusicService.MyBinder;
-
 
         musicService = binder.getService()
         musicService!!.setOtherCallBack(this)
@@ -205,18 +204,18 @@ class MiniPlayerFragment : Fragment(), ServiceConnection, OnMiniPlayerChangeList
         }
     }
     private fun playNextSelf(){
-        //Toast.makeText(activity, "Next1111", Toast.LENGTH_LONG).show()
+        Toast.makeText(activity, "Next1111", Toast.LENGTH_LONG).show()
         musicService?.clickNext()
         onMiniPlayerUpdate()
     }
     private fun playPrevSelf(){
-        //Toast.makeText(activity, "Prev1111", Toast.LENGTH_LONG).show()
+        Toast.makeText(activity, "Prev1111", Toast.LENGTH_LONG).show()
         musicService?.clickPrev()
         onMiniPlayerUpdate()
     }
     private fun playPauseSelf() {
-        //Toast.makeText(activity, "Pause1111", Toast.LENGTH_LONG).show()
         if(musicService!=null) {
+            Toast.makeText(activity, "Pause1111", Toast.LENGTH_LONG).show()
             musicService!!.clickPlay()
             if(musicService!!.isPlaying()) {
                 mini_player_play_btn.setImageResource(R.drawable.stop)
