@@ -114,6 +114,7 @@ class MainScreenFragment : Fragment(), OnClickCategoryItemListener {
     private fun showPlaylistFragment(){
         playListFragment = PlaylistFragment()
         activity!!.supportFragmentManager.beginTransaction()
+            .setCustomAnimations(R.anim.animate_card_enter, R.anim.animate_card_exit, R.anim.animate_slide_left_enter, R.anim.animate_slide_left_exit)
             .replace(R.id.main_id, playListFragment!!).addToBackStack(null)
             .commit();
     }
@@ -126,6 +127,7 @@ class MainScreenFragment : Fragment(), OnClickCategoryItemListener {
     private fun showAllSongFragment(){
         allSongFragment = AllSongFragment()
         activity!!.supportFragmentManager.beginTransaction()
+            .setCustomAnimations(R.anim.animate_card_enter, R.anim.animate_card_exit, R.anim.animate_slide_left_enter, R.anim.animate_slide_left_exit)
             .replace(R.id.main_id,allSongFragment!!).addToBackStack(null)
             .commit();
     }

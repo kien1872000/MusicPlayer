@@ -19,6 +19,7 @@ import com.example.musicplayer.MiniPlayer
 import com.example.musicplayer.Models.Song
 import com.example.musicplayer.MusicService
 import com.example.musicplayer.R
+import kotlin.system.exitProcess
 
 
 class MainActivity : AppCompatActivity() {
@@ -82,6 +83,7 @@ class MainActivity : AppCompatActivity() {
     private fun initView(){
         mainScreenFragment = MainScreenFragment()
         supportFragmentManager.beginTransaction()
+            .setCustomAnimations(R.anim.animate_shrink_enter, R.anim.animate_shrink_exit)
             .replace(R.id.main_id,mainScreenFragment!!)
             .commit();
     }
@@ -111,6 +113,8 @@ class MainActivity : AppCompatActivity() {
         var intent = Intent(this, MusicService::class.java)
         stopService(intent)
     }
+
+
 //    override fun onResume() {
 //        super.onResume()
 //        var preferences: SharedPreferences =

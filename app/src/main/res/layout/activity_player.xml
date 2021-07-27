@@ -24,7 +24,7 @@
             android:layout_width="wrap_content"
             android:textSize="25dp"
             android:layout_height="wrap_content"
-            android:text="Now playing"
+            android:text="Đang phát"
             android:layout_centerHorizontal="true"
             android:textColor="@color/white" />
     </RelativeLayout>
@@ -143,8 +143,8 @@
         <ImageView
             android:id="@+id/repeatButton"
             android:layout_centerVertical="true"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:layout_marginRight="30dp"
             android:layout_toLeftOf="@id/prevButton"
             android:src="@drawable/refresh" />

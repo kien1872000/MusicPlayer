@@ -1,6 +1,7 @@
 package com.example.musicplayer.Activities
 
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
@@ -27,6 +28,7 @@ class AlbumDetailActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_album_detail)
+        album_detail_backButton.setColorFilter(Color.parseColor("#d7dade"))
         getIntentMethod()
         album_songs_listView?.setHasFixedSize(true);
         if (songs.size >= 1) {

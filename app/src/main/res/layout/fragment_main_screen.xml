@@ -5,7 +5,9 @@
     android:layout_height="match_parent">
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:id="@+id/scrollView"
+        android:layout_above="@id/fragment_bottom_player_main_screen"
+        android:layout_height="wrap_content">
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -48,15 +50,13 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/listen_a_lot_text"
                 />
-            <FrameLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:id="@+id/fragment_bottom_player_main_screen"/>
 
         </RelativeLayout>
-
     </ScrollView>
-
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:id="@+id/fragment_bottom_player_main_screen"/>
 
 </RelativeLayout>

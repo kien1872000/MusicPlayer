@@ -44,7 +44,7 @@ class AlbumAdapter(var context: Context?, var albums: ArrayList<Album>) :
         val bitmap = image?.size?.let { BitmapFactory.decodeByteArray(image, 0, it) }
         if(bitmap==null){
             Glide.with(context!!).asBitmap()
-                .load(R.drawable.song_image)
+                .load(R.drawable.album_image)
                 .into(viewHolder.album_image)
         }
         else  viewHolder.album_image.setImageBitmap(bitmap)

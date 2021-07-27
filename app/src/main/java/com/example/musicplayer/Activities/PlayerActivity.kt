@@ -24,6 +24,7 @@ import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
+import com.blogspot.atifsoftwares.animatoolib.Animatoo
 import com.example.musicplayer.*
 import com.example.musicplayer.ApplicationClass.Companion.ACTION_NEXT
 import com.example.musicplayer.ApplicationClass.Companion.ACTION_PLAY
@@ -37,6 +38,7 @@ import kotlinx.android.synthetic.main.fragment_song_playing.positionBar
 import kotlinx.android.synthetic.main.fragment_song_playing.remainingTimeLabel
 import kotlinx.android.synthetic.main.fragment_song_playing.volumeBar
 import kotlinx.android.synthetic.main.song.song_image
+import maes.tech.intentanim.CustomIntent
 
 
 class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
@@ -113,15 +115,18 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
 
         position = intent.getIntExtra("position", -1)
         category = intent.getStringExtra("category")
-        if(category!=null&&category=="albumDetail"){
-            musicItems = AlbumDetailActivity.songs
+        if(category!=null) {
+            if(category=="albumDetail"){
+                musicItems = AlbumDetailActivity.songs
+            }
+            else if(category=="recent"){
+                musicItems = MainScreenFragment.recentSongList
+            }
+            else {
+                musicItems = MainActivity.song_list
+            }
         }
-        else if(category=="recent"){
-            musicItems = MainScreenFragment.recentSongList
-        }
-        else {
-            musicItems = MainActivity.song_list
-        }
+
         if(position>=0) {
             anim!!.start()
             uri = Uri.parse(musicItems[position].path)
@@ -302,7 +307,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
                     shuffleButton.setColorFilter(Color.parseColor("#99ddff"))
                 }
                 MotionEvent.ACTION_CANCEL -> {
-                    playPrev()
                     if(isShuffle){
                         shuffleButton.setColorFilter(Color.WHITE)
                         isShuffle = false
@@ -313,7 +317,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
                     }
                 }
                 MotionEvent.ACTION_UP -> {
-                    playPrev()
                     if(isShuffle){
                         shuffleButton.setColorFilter(Color.WHITE)
                         isShuffle = false
@@ -325,16 +328,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
                 }
             }
             true
-        }
-        shuffleButton.setOnClickListener{
-            if(isShuffle){
-                shuffleButton.setColorFilter(Color.WHITE)
-                isShuffle = false
-            }
-            else{
-                shuffleButton.setColorFilter(Color.parseColor("#E45D32D5"))
-                isShuffle = true
-            }
         }
     }
     private fun autoNext(){
@@ -534,4 +527,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         anim!!.interpolator = LinearInterpolator()
        anim!!.repeatMode = ObjectAnimator.RESTART
     }
+
+
+
 }

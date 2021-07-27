@@ -1,6 +1,7 @@
 package com.example.musicplayer.Activities
 
 import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -13,6 +14,7 @@ import android.os.Bundle
 import android.os.IBinder
 import android.support.v4.media.session.MediaSessionCompat
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.LinearInterpolator
@@ -24,6 +26,7 @@ import androidx.core.view.iterator
 import androidx.core.view.size
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.blogspot.atifsoftwares.animatoolib.Animatoo
 import com.example.musicplayer.*
 import com.example.musicplayer.Adapters.PlaylistDetailAdapter
 import com.example.musicplayer.Fragments.PlaylistFragment
@@ -48,10 +51,12 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
     private var mediaSessionCompat: MediaSessionCompat? = null
     private var musicService: MusicService? = null
     private var isBound = false;
-    private var playlistPosition = -1;
+    private var playlistPosition = -1
+    private var isFavorite = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_playlist_detail)
+        initActionButtonsView()
         setRotateSongImage()
         mediaSessionCompat = MediaSessionCompat(baseContext, "My audio")
         getIntentMethod()
@@ -65,17 +70,35 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
             anim!!.start()
             bindMusicService()
         }
-//        if(playlist_songs.size>=1){
-
-//       }
     }
 
-//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-//        super.onActivityResult(requestCode, resultCode, data)
-//        if(requestCode==1) {
-//            playlistDetailAdapter!!.notifyDataSetChanged()
-//        }
-//    }
+    private fun initActionButtonsView(){
+        playlist_detail_backButton.setColorFilter(Color.WHITE)
+        playlist_detail_favoriteButton.setColorFilter(Color.WHITE)
+        playlist_shuffleButton.setColorFilter(Color.WHITE)
+        playlist_repeatButton.setColorFilter(Color.WHITE)
+        playlist_detail_addButton.setColorFilter(Color.WHITE)
+    }
+    @SuppressLint("ClickableViewAccessibility")
+    private fun favoriteBtnClick() {
+        playlist_detail_favoriteButton.setOnTouchListener { v, event ->
+            when(event.action){
+                MotionEvent.ACTION_DOWN -> playlist_detail_favoriteButton.setColorFilter(Color.parseColor("#99ddff"))
+                MotionEvent.ACTION_UP -> {
+                    if(!isFavorite) {
+                        isFavorite = true
+                        playlist_detail_favoriteButton!!.setColorFilter(Color.parseColor("#ff4081"))
+                    }
+                    else {
+                        isFavorite = false
+                        playlist_detail_favoriteButton!!.setColorFilter(Color.WHITE)
+                    }
+                }
+            }
+            true
+        }
+
+    }
     private fun getIntentMethod(){
         if(!flag){
             flag = true
@@ -135,6 +158,7 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
                 musicService!!.stop()
                 musicService!!.release()
                 uri = Uri.parse(playlist_songs[position].path)
+                playlist_artist_detail.text = playlist_songs[position].artist
                 musicService!!.createMediaPlayer(position)
                 setImage(uri.toString())
                 playlist_playButton.setImageResource(R.drawable.stop)
@@ -147,8 +171,10 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
                 setImage(uri.toString())
                 playlist_playButton.setImageResource(R.drawable.stop)
                 playlist_name_detail.text = playlist_songs[position].name
+                playlist_artist_detail.text = playlist_songs[position].artist
                 musicService!!.start()
             }
+            autoNext()
         }
     }
 
@@ -208,21 +234,36 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         })
         builder?.show()
     }
+    @SuppressLint("ClickableViewAccessibility")
     private fun addSong(){
-        addButton.setOnClickListener {
-           showDialog()
-//            if(musicService!=null&&mus)
+        playlist_detail_addButton.setOnTouchListener { v, event ->
+             when(event.action){
+                 MotionEvent.ACTION_DOWN -> playlist_detail_addButton.setColorFilter(Color.parseColor("#99ddff"))
+                 MotionEvent.ACTION_UP -> {
+                     playlist_detail_addButton.setColorFilter(Color.WHITE)
+                     showDialog()
+                 }
+             }
+            true
         }
     }
+    @SuppressLint("ClickableViewAccessibility")
     private fun playBtnClick(){
-        playlist_playButton.setOnClickListener {
-            if(musicService!=null) {
-                if(musicService!!.mediaPlayer==null){
+        playlist_playButton.setOnTouchListener { v, event ->
+            when(event.action){
+                MotionEvent.ACTION_DOWN -> playlist_playButton.setColorFilter(Color.parseColor("#99ddff"))
+                MotionEvent.ACTION_UP -> {
+                    playlist_playButton.colorFilter = null
+                    if(musicService!=null) {
+                        if(musicService!!.mediaPlayer==null){
 
-                    Toast.makeText(this, "Không có bài hát nào được thêm", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "Không có bài hát nào được thêm", Toast.LENGTH_SHORT).show()
+                        }
+                        else playPause()
+                    }
                 }
-                else playPause()
             }
+            true
         }
     }
     private fun autoNext(){
@@ -230,45 +271,82 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
             playNext()
         }
     }
+    @SuppressLint("ClickableViewAccessibility")
     private fun prevBtnClick(){
-        playlist_prevButton.setOnClickListener {
-            if(musicService!=null) {
-                if(musicService!!.mediaPlayer==null){
-                    Toast.makeText(this, "Không có bài hát nào được thêm", Toast.LENGTH_SHORT).show()
+        playlist_prevButton.setOnTouchListener { v, event ->
+            when(event.action){
+                MotionEvent.ACTION_DOWN -> playlist_prevButton.setColorFilter(Color.parseColor("#99ddff"))
+                MotionEvent.ACTION_UP -> {
+                    playlist_prevButton.colorFilter = null
+                    if(musicService!=null) {
+                        if(musicService!!.mediaPlayer==null){
+
+                            Toast.makeText(this, "Không có bài hát nào được thêm", Toast.LENGTH_SHORT).show()
+                        }
+                        else playPrev()
+                    }
                 }
-                else playPrev()
             }
+            true
         }
     }
+    @SuppressLint("ClickableViewAccessibility")
     private fun nextBtnClick(){
-        playlist_nextButton.setOnClickListener {
-            if(musicService!=null) {
-                if(musicService!!.mediaPlayer==null){
-                    Toast.makeText(this, "Không có bài hát nào được thêm", Toast.LENGTH_SHORT).show()
+        playlist_nextButton.setOnTouchListener { v, event ->
+            when(event.action){
+                MotionEvent.ACTION_DOWN -> playlist_nextButton.setColorFilter(Color.parseColor("#99ddff"))
+                MotionEvent.ACTION_UP -> {
+                    playlist_nextButton.colorFilter = null
+                    if(musicService!=null) {
+                        if(musicService!!.mediaPlayer==null){
+
+                            Toast.makeText(this, "Không có bài hát nào được thêm", Toast.LENGTH_SHORT).show()
+                        }
+                        else playNext()
+                    }
                 }
-                else playNext()
             }
+            true
         }
     }
+    @SuppressLint("ClickableViewAccessibility")
     private fun repeatBtnClick(){
-        playlist_repeatButton.setOnClickListener {
-           if(musicService!=null) {
-               if(musicService!!.mediaPlayer==null){
-                   Toast.makeText(this, "Không có bài hát nào được thêm", Toast.LENGTH_SHORT).show()
-               }
-               else playRepeat()
-           }
+        playlist_repeatButton.setOnTouchListener { v, event ->
+            when(event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    playlist_repeatButton.setColorFilter(Color.parseColor("#99ddff"))
+                }
+                MotionEvent.ACTION_UP -> {
+                    if(musicService!=null) {
+                        if(musicService!!.mediaPlayer==null){
+                            Toast.makeText(this, "Không có bài hát nào được thêm", Toast.LENGTH_SHORT).show()
+                        }
+                        else playRepeat()
+                    }
+                }
+            }
+            true
         }
+
     }
+    @SuppressLint("ClickableViewAccessibility")
     private fun shuffleBtnClick(){
-        playlist_shuffleButton.setOnClickListener {
-           if(musicService!=null) {
-               if(musicService!!.mediaPlayer==null){
-                   Toast.makeText(this, "Không có bài hát nào được thêm", Toast.LENGTH_SHORT).show()
-               }
-               else playShuffle()
-           }
+        playlist_shuffleButton.setOnTouchListener { v, event ->
+            when(event.action) {
+                MotionEvent.ACTION_DOWN -> playlist_shuffleButton.setColorFilter(Color.parseColor("#99ddff"))
+                MotionEvent.ACTION_UP -> {
+                    if(musicService!=null) {
+                        if(musicService!!.mediaPlayer==null){
+                            Toast.makeText(this, "Không có bài hát nào được thêm", Toast.LENGTH_SHORT).show()
+                        }
+                        else playShuffle()
+                    }
+
+                }
+            }
+            true
         }
+
     }
     override fun playNext(){
 //        Toast.makeText(this, "PlayNext Hế lồ", Toast.LENGTH_SHORT).show()
@@ -298,6 +376,7 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         playlist_playButton.setImageResource(R.drawable.stop)
         showNotification(R.drawable.stop, R.drawable.ic_pause)
         playlist_name_detail.text = playlist_songs[position].name
+        playlist_artist_detail.text = playlist_songs[position].artist
         musicService!!.start()
         MiniPlayer.PATH_TO_FRAG = playlist_songs[position].path
         MiniPlayer.SONG_NAME_TO_FRAG = playlist_songs[position].name
@@ -322,6 +401,7 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         playlist_playButton.setImageResource(R.drawable.stop)
         showNotification(R.drawable.stop, R.drawable.ic_pause)
         playlist_name_detail.text = playlist_songs[position].name
+        playlist_artist_detail.text = playlist_songs[position].artist
         musicService!!.start()
         playlist_songs_listView.smoothScrollToPosition(position)
         playlistDetailAdapter!!.selectedPosition = position
@@ -334,22 +414,22 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
     private fun playRepeat(){
         if(!isRepeat){
             isRepeat = true;
-            playlist_repeatButton.setColorFilter(Color.RED)
+            playlist_repeatButton.setColorFilter(Color.parseColor("#E45D32D5"))
         }
         else{
             isRepeat = false
-            playlist_repeatButton.setColorFilter(Color.BLACK)
+            playlist_repeatButton.setColorFilter(Color.WHITE)
         }
 
     }
     private fun playShuffle(){
         if(!isShuffle){
             isShuffle = true;
-            playlist_shuffleButton.setColorFilter(Color.RED)
+            playlist_shuffleButton.setColorFilter(Color.parseColor("#E45D32D5"))
         }
         else{
             isShuffle = false
-            playlist_shuffleButton.setColorFilter(Color.BLACK)
+            playlist_shuffleButton.setColorFilter(Color.WHITE)
         }
 
     }
@@ -370,8 +450,8 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
                 musicService!!.start()
                 showNotification(R.drawable.stop, R.drawable.ic_pause)
                 playlist_playButton.setImageResource(R.drawable.stop)
-                MiniPlayer.PLAY_PAUSE = "Play"
                 playlistDetailAdapter!!.notifyItemChanged(position)
+                MiniPlayer.PLAY_PAUSE = "Play"
             }
         }
         MiniPlayer.PATH_TO_FRAG = playlist_songs[position].path;
@@ -379,14 +459,30 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         MiniPlayer.SONG_ARTIST_TO_FRAG = playlist_songs[position].artist;
 
     }
+    @SuppressLint("ClickableViewAccessibility")
+    private fun backBtnClick(){
+        playlist_detail_backButton?.setOnTouchListener{v, event ->
+            when(event.action) {
+                MotionEvent.ACTION_DOWN -> playlist_detail_backButton.setColorFilter(Color.parseColor("#99ddff"))
+                MotionEvent.ACTION_UP -> {
+                    playlist_detail_backButton.setColorFilter(Color.WHITE)
+                    onBackPressed()
+                }
+            }
+            true
+        }
+    }
     override fun onResume() {
         super.onResume()
+        favoriteBtnClick()
         shuffleBtnClick()
         repeatBtnClick()
         prevBtnClick()
         nextBtnClick()
         playBtnClick()
+        backBtnClick()
         autoNext()
+        Log.d("rrrr1", "Yes")
         addSong()
     }
     private fun showDialog(){
@@ -494,8 +590,10 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
                 uri = Uri.parse(playlist_songs[0].path)
                 setImage(uri.toString())
                 playlist_name_detail.text = playlist_songs[0].name
+                playlist_artist_detail.text = playlist_songs[0].artist
                 musicService!!.stop()
                 musicService!!.release()
+                playlistDetailAdapter!!.notifyItemChanged(0)
                 //mediaPlayer = MediaPlayer.create(applicationContext, uri)
                 musicService!!.createMediaPlayer(position)
                 musicService!!.start()
@@ -536,12 +634,8 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         anim!!.interpolator = LinearInterpolator()
         anim!!.repeatMode = ObjectAnimator.RESTART
     }
-//    override fun onBackPressed() {
-//        super.onBackPressed()
-//        playlist_songs_listView.adapter = null
-//        playlist_songs_listView.layoutManager = null
-//        playlistDetailAdapter = null
-//    }
+
+
 
 
 }

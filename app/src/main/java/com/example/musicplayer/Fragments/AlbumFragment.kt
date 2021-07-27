@@ -44,10 +44,11 @@ class AlbumFragment : Fragment() {
     }
     private fun setAlbumList(){
         album_list.clear()
+        album_name_list.clear()
         for(musicItem in MainActivity.song_list){
-            if(!(musicItem.album in album_name_list)) {
+            if(musicItem.album !in album_name_list) {
                 album_name_list.add(musicItem.album)
-                var albumItem = Album(musicItem.album, musicItem.path)
+                val albumItem = Album(musicItem.album, musicItem.path)
                 album_list.add(albumItem)
             }
         }

@@ -36,11 +36,13 @@ class PlaylistDetailAdapter(var context: Context?, var songs: ArrayList<Song>, v
         var song_image: ImageView
         var delete_btn: ImageView
         var wave_bar: VuMeterView
+        var artists: TextView
         init{
             song_name = view.findViewById(R.id.song_playlist_name) as TextView
             song_image = view.findViewById(R.id.song_playlist_image) as ImageView
             delete_btn = view. findViewById(R.id.song_playlist_delete_btn) as ImageView
             wave_bar = view.findViewById(R.id.song_playlist_vumeter) as VuMeterView
+            artists = view.findViewById(R.id.song_playlist_artists) as TextView
         }
     }
 
@@ -61,9 +63,9 @@ class PlaylistDetailAdapter(var context: Context?, var songs: ArrayList<Song>, v
        lastPosition = position
        holder.delete_btn.setImageResource(R.drawable.trash)
        holder.song_name.text = songs[position].name
+       holder.artists.text = songs[position].artist
        holder.wave_bar.visibility = View.INVISIBLE
-       holder.itemView.setBackgroundColor(Color.BLACK)
-       holder.wave_bar.resume(true)
+       holder.itemView.setBackgroundColor(Color.parseColor("#302f2f"))
        var image = getSongArt(songs[position].path)
        var bitmap = image?.size?.let { BitmapFactory.decodeByteArray(image, 0, it) }
        if(bitmap==null){
@@ -74,7 +76,7 @@ class PlaylistDetailAdapter(var context: Context?, var songs: ArrayList<Song>, v
        }
 
         if(position == selectedPosition){
-            holder.itemView.setBackgroundColor(Color.GRAY)
+            holder.itemView.setBackgroundColor(Color.parseColor("#403f3d"))
 //            holder.itemView.isSelected = true
             val sdf = SimpleDateFormat("dd/M/yyyy hh:mm:ss")
             val currentDate = sdf.format(Date())
@@ -86,6 +88,7 @@ class PlaylistDetailAdapter(var context: Context?, var songs: ArrayList<Song>, v
         }
 
         if(isPause) {
+            Log.d("176123", "345")
             isPause = false
             holder.wave_bar.pause()
         }

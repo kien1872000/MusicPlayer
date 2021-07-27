@@ -52,6 +52,8 @@ dependencies {
     compileOnly 'com.google.android.wearable:wearable:2.6.0'
     kapt 'com.github.bumptech.glide:annotations:4.9.0'
     compile 'io.gresse.hugo.vumeterlibrary:vumeterlibrary:1.0.17'
+    compile 'com.github.hajiyevelnur92:intentanimation:1.0'
+    implementation 'com.github.mohammadatif:Animatoo:master'
 
 }
 configurations.all {
