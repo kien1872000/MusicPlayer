@@ -33,6 +33,7 @@ import com.example.musicplayer.ApplicationClass.Companion.CHANNEL_ID_2
 import com.example.musicplayer.Fragments.MainScreenFragment
 import com.example.musicplayer.Models.Song
 import kotlinx.android.synthetic.main.activity_player.*
+import kotlinx.android.synthetic.main.activity_playlist_detail.*
 import kotlinx.android.synthetic.main.fragment_song_playing.elapsedTimeLabel
 import kotlinx.android.synthetic.main.fragment_song_playing.positionBar
 import kotlinx.android.synthetic.main.fragment_song_playing.remainingTimeLabel
@@ -78,12 +79,13 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         prevBtnClick()
         nextBtnClick()
         playBtnClick()
+        favoriteBtnClick()
         super.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-
+        Log.d("VNNN", position.toString())
         unbindService(this)
 
     }
@@ -128,6 +130,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         }
 
         if(position>=0) {
+            initFavoriteButtonView()
             anim!!.start()
             uri = Uri.parse(musicItems[position].path)
             var image = getAlbumArt(uri.toString())
@@ -347,6 +350,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
                 position = (0..position).random()
             }
         }
+        initFavoriteButtonView()
         uri = Uri.parse(musicItems[position].path)
         val image = getAlbumArt(uri.toString())
         val bitmap = image?.size?.let { BitmapFactory.decodeByteArray(image, 0, it) }
@@ -383,6 +387,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
                 position = (position until musicItems.size).random()
             }
         }
+        initFavoriteButtonView()
         uri = Uri.parse(musicItems[position].path)
         val image = getAlbumArt(uri.toString())
         val bitmap = image?.size?.let { BitmapFactory.decodeByteArray(image, 0, it) }
@@ -527,7 +532,34 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         anim!!.interpolator = LinearInterpolator()
        anim!!.repeatMode = ObjectAnimator.RESTART
     }
+    private fun initFavoriteButtonView() {
+        if(musicItems[position].isFavorite==1) {
+            favorite_button.setColorFilter(Color.parseColor("#ff4081"))
+        }
+        else {
+            favorite_button.setColorFilter(Color.WHITE)
+        }
+    }
+    @SuppressLint("ClickableViewAccessibility")
+    private fun favoriteBtnClick() {
+        favorite_button.setOnTouchListener { v, event ->
+            when(event.action){
+                MotionEvent.ACTION_DOWN -> favorite_button.setColorFilter(Color.parseColor("#99ddff"))
+                MotionEvent.ACTION_UP -> {
+                    if(musicItems[position].isFavorite==0) {
+                        musicItems[position].isFavorite = 1
+                        favorite_button!!.setColorFilter(Color.parseColor("#ff4081"))
+                    }
+                    else {
+                        musicItems[position].isFavorite = 0
+                        favorite_button!!.setColorFilter(Color.WHITE)
+                    }
+                }
+            }
+            true
+        }
 
+    }
 
 
 }

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+     <EditText
+         android:id="@+id/playlist_name_edt"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:textSize="20dp"
+         android:hint="Hãy nhập tên playlist"/>
+    <TextView
+        android:id="@+id/playlist_creation_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="15dp"
+        android:textSize="20dp"
+        android:text="Danh sách bài hát gợi ý"
+        android:layout_below="@id/playlist_name_edt"
+        />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/song_suggests_playlist_creation_list"
+        android:layout_below="@+id/playlist_creation_text"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</RelativeLayout>

@@ -17,7 +17,7 @@ import com.example.musicplayer.R
 import com.example.musicplayer.SongSuggestClickListener
 import org.w3c.dom.Text
 
-class SongSuggestAdapter(var context: Context?, var songs: ArrayList<Song>, var onItemClick: SongSuggestClickListener?):
+class SongSuggestAdapter(var context: Context?, var songs: ArrayList<Song>, var onItemClick: SongSuggestClickListener?, var type: Int =0):
     RecyclerView.Adapter<SongSuggestAdapter.ViewHolder>(){
     class ViewHolder(view: View): RecyclerView.ViewHolder(view)  {
         var song_name: TextView

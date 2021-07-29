@@ -1,19 +1,21 @@
 package com.example.musicplayer.Fragments
 
 import android.content.*
+import android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.os.Bundle
 import android.os.IBinder
-import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import com.example.musicplayer.*
+import com.example.musicplayer.Activities.PlayerActivity
 import kotlinx.android.synthetic.main.fragment_mini_player.*
 import kotlinx.android.synthetic.main.song.*
+
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -130,6 +132,7 @@ class MiniPlayerFragment : Fragment(), ServiceConnection, OnMiniPlayerChangeList
         mini_player_prev_btn?.setOnClickListener {
             playPrevSelf()
         }
+        onClickBottomBar()
     }
 //    private fun onClickPlayBtn() {
 //        if(musicService!!.isPlaying()) {
@@ -212,6 +215,13 @@ class MiniPlayerFragment : Fragment(), ServiceConnection, OnMiniPlayerChangeList
         Toast.makeText(activity, "Prev1111", Toast.LENGTH_LONG).show()
         musicService?.clickPrev()
         onMiniPlayerUpdate()
+    }
+    private fun onClickBottomBar(){
+        mini_player_bar.setOnClickListener {
+            val i = Intent(context, PlayerActivity::class.java)
+            i.flags = FLAG_ACTIVITY_REORDER_TO_FRONT;
+            startActivity(i)
+        }
     }
     private fun playPauseSelf() {
         if(musicService!=null) {

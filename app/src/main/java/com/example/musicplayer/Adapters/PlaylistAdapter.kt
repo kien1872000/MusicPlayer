@@ -9,11 +9,14 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.musicplayer.Activities.MainActivity
 import com.example.musicplayer.Activities.PlaylistDetailActivity
+import com.example.musicplayer.Activities.ServiceCommunication
 import com.example.musicplayer.Models.Album
+import com.example.musicplayer.Models.Playlist
 import com.example.musicplayer.R
 
-class PlaylistAdapter(var context: Context?, var playlists: ArrayList<Album>) :
+class PlaylistAdapter(var context: Context?, var playlists: ArrayList<Playlist>) :
     RecyclerView.Adapter<PlaylistAdapter.ViewHolder>() {
     private val selectedPosition = 0
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -43,15 +46,11 @@ class PlaylistAdapter(var context: Context?, var playlists: ArrayList<Album>) :
             .into(viewHolder.playlist_image)
 
         viewHolder.itemView.setOnClickListener {
+            val songs = MainActivity.musicPlayerDbHelper!!.getSongsInPlaylist(playlists[position]._id)
             val intent = Intent(context, PlaylistDetailActivity::class.java)
-            intent.putExtra("playlistPosition", position)
+            intent.putExtra("songsInPlaylist", songs)
+            intent.putExtra("playlistId", playlists[position]._id)
             context?.startActivity(intent)
-        }
-        if(position==playlists.size-1) {
-            viewHolder.playlist_name.text = "Thêm playlist ở đây"
-            Glide.with(context!!).asBitmap()
-                .load(R.drawable.add_image)
-                .into(viewHolder.playlist_image)
         }
     }
     override fun getItemCount() = playlists.size

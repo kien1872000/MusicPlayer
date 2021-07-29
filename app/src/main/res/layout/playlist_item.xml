@@ -1,30 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="180dp"
-    android:layout_height="180dp"
+    android:layout_width="match_parent"
+    android:layout_height="100dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/playlist_item"
     app:cardCornerRadius="5dp"
-    android:layout_marginLeft="13dp"
-    android:layout_marginBottom="10dp"
+    android:layout_margin="10dp"
     app:cardElevation="10dp"
     >
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/white"
-        android:orientation="vertical">
+        android:layout_height="wrap_content">
         <ImageView
+            android:layout_alignParentLeft="true"
             android:id="@+id/playlist_image"
-            android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:src="@drawable/song_image"/>
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:src="@drawable/album_image"/>
         <TextView
             android:id="@+id/playlist_name"
             android:layout_marginTop="2dp"
-            android:gravity="center"
+            android:layout_toEndOf="@id/playlist_image"
+            android:layout_centerVertical="true"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textSize="25dp"
+            android:layout_marginLeft="20dp"
             android:text="Playlist name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
-    </LinearLayout>
+    </RelativeLayout>
 </androidx.cardview.widget.CardView>

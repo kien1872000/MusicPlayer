@@ -3,14 +3,56 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal"
-    tools:context=".Fragments.PlaylistFragment"
-    >
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".Fragments.PlaylistFragment">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/playlist_title"
+        android:layout_margin="10dp"
+        android:textSize="30dp"
+        android:text="Playlist"/>
+    <androidx.cardview.widget.CardView
+        android:layout_below="@+id/playlist_title"
+        android:layout_width="match_parent"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="10dp"
+        app:cardCornerRadius="5dp"
+        android:id="@+id/add_playlist_parent"
+        app:cardElevation="10dp"
+        android:layout_height="100dp">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <ImageView
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/add_image"
+                android:id="@+id/add_playlist_button"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/add_playlist_button"
+                android:layout_marginLeft="20dp"
+                android:text="Thêm playlist..."
+                android:textSize="25dp"
+                android:layout_centerVertical="true"
+                android:textColor="#A8142A"/>
 
+        </RelativeLayout>
+    </androidx.cardview.widget.CardView>
     <androidx.recyclerview.widget.RecyclerView
+        android:layout_below="@id/add_playlist_parent"
         android:id="@+id/all_songs_playlist"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:maxLines="1" />
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:id="@+id/fragment_bottom_player_playlist"/>
 
 </RelativeLayout>

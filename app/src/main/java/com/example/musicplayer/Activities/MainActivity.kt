@@ -1,5 +1,6 @@
 package com.example.musicplayer.Activities
 
+import com.example.musicplayer.MusicPlayerDbHelper
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
@@ -9,7 +10,6 @@ import android.database.Cursor
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -19,11 +19,11 @@ import com.example.musicplayer.MiniPlayer
 import com.example.musicplayer.Models.Song
 import com.example.musicplayer.MusicService
 import com.example.musicplayer.R
-import kotlin.system.exitProcess
 
 
 class MainActivity : AppCompatActivity() {
     companion object {
+        var musicPlayerDbHelper: MusicPlayerDbHelper? = null
         var song_list: ArrayList<Song> = ArrayList()
         const val REQUEST_CODE:Int=1;
         fun getAllMusic(context: Context): ArrayList<Song>{
@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity() {
                     var artists: String = cusor.getString(2)
                     var duration: String = cusor.getString(3)
                     var path: String = cusor.getString(4)
-                    var song: Song = Song(title, album, path, artists, duration)
+                    var song: Song = Song(-1, title, album, path, artists, 0)
                     tempMusicList.add(song)
                 }
                 cusor.close()
@@ -66,7 +66,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        musicPlayerDbHelper = MusicPlayerDbHelper(this)
         permisson()
+
 
     }
     private fun permisson(){
@@ -77,6 +79,8 @@ class MainActivity : AppCompatActivity() {
         else{
             Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show()
             song_list = getAllMusic(this)
+            song_list = musicPlayerDbHelper!!.getAllSong()
+            //musicPlayerDbHelper!!.insertSongs(song_list)
             initView()
         }
     }
@@ -111,6 +115,7 @@ class MainActivity : AppCompatActivity() {
             applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notifyManager.cancelAll()
         var intent = Intent(this, MusicService::class.java)
+//        musicPlayerDbHelper!!.close()
         stopService(intent)
     }
 

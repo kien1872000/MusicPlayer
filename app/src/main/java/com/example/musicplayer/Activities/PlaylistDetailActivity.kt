@@ -43,7 +43,7 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
     private var position = 0
     private var anim: ObjectAnimator? = null
     private var playlistDetailAdapter: PlaylistDetailAdapter? = null
-    private var play_list_name: String? = null
+    private var playlistId: Long = -1
     private var flag = false
     private var isRepeat = false
     private var isShuffle = false
@@ -71,10 +71,16 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
             bindMusicService()
         }
     }
-
+    private fun initFavoriteButtonView() {
+        if(playlist_songs[position].isFavorite==1) {
+            playlist_detail_favoriteButton.setColorFilter(Color.parseColor("#ff4081"))
+        }
+        else {
+            playlist_detail_favoriteButton.setColorFilter(Color.WHITE)
+        }
+    }
     private fun initActionButtonsView(){
         playlist_detail_backButton.setColorFilter(Color.WHITE)
-        playlist_detail_favoriteButton.setColorFilter(Color.WHITE)
         playlist_shuffleButton.setColorFilter(Color.WHITE)
         playlist_repeatButton.setColorFilter(Color.WHITE)
         playlist_detail_addButton.setColorFilter(Color.WHITE)
@@ -85,12 +91,12 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
             when(event.action){
                 MotionEvent.ACTION_DOWN -> playlist_detail_favoriteButton.setColorFilter(Color.parseColor("#99ddff"))
                 MotionEvent.ACTION_UP -> {
-                    if(!isFavorite) {
-                        isFavorite = true
+                    if(playlist_songs[position].isFavorite==0) {
+                        playlist_songs[position].isFavorite = 1
                         playlist_detail_favoriteButton!!.setColorFilter(Color.parseColor("#ff4081"))
                     }
                     else {
-                        isFavorite = false
+                        playlist_songs[position].isFavorite = 0
                         playlist_detail_favoriteButton!!.setColorFilter(Color.WHITE)
                     }
                 }
@@ -104,8 +110,8 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
             flag = true
             playlist_playButton.setImageResource(R.drawable.stop)
         }
-        playlistPosition = intent.getIntExtra("playlistPosition", -1);
         initPlaylist()
+        initFavoriteButtonView()
 
     }
     private fun setImage(uri: String){
@@ -119,25 +125,8 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         }
     }
     private fun initPlaylist(){
-        playlist_songs.clear()
-        when(playlistPosition){
-            0 -> {
-                playlist_songs.add(MainActivity.song_list[0])
-                playlist_songs.add(MainActivity.song_list[1])
-                playlist_songs.add(MainActivity.song_list[2])
-                playlist_songs.add(MainActivity.song_list[3])
-                playlist_songs.add(MainActivity.song_list[4])
-                playlist_songs.add(MainActivity.song_list[5])
-                playlist_songs.add(MainActivity.song_list[8])
-                playlist_songs.add(MainActivity.song_list[9])
-
-            }
-            1 ->{
-                playlist_songs.add(MainActivity.song_list[4])
-                playlist_songs.add(MainActivity.song_list[15])
-
-            }
-        }
+       playlistId = intent.getLongExtra("playlistId", -1)
+       playlist_songs= intent.getSerializableExtra("songsInPlaylist") as ArrayList<Song>
     }
     private fun getSongArt(uri: String): ByteArray?{
         val retriever = MediaMetadataRetriever()
@@ -150,6 +139,7 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         val tempPosition = this.position
         this.position = position
         showNotification(R.drawable.stop, R.drawable.ic_pause)
+        initFavoriteButtonView()
         if(musicService!=null) {
             playlistDetailAdapter!!.notifyItemChanged(tempPosition)
             playlistDetailAdapter!!.selectedPosition = position
@@ -183,9 +173,6 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
     }
     private fun deletePlaylistItem(position: Int) {
         val tempPosition = position
-        Log.d("ggggf",
-            position.toString()
-        )
         playlist_songs.removeAt(position)
         playlist_songs_listView.adapter!!.notifyItemRemoved(position)
         musicService!!.musicFiles = playlist_songs;
@@ -203,7 +190,6 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         musicService!!.position = this.position
     }
     private fun deletePlaylist() {
-        onBackPressed()
         //unbindService(this)
         var editor: SharedPreferences.Editor? = getSharedPreferences(MiniPlayer.LAST_PLAYED_SONG, Context.MODE_PRIVATE).edit()
         editor?.putBoolean(MiniPlayer.START_PLAYER_ACTIVITY, false)
@@ -213,6 +199,7 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         notifyManager.cancelAll()
         var intent = Intent(this, MusicService::class.java)
         stopService(intent)
+        onBackPressed()
     }
     private fun confirmDelete(position: Int) {
         var msg: String = "Bạn chắc chắn muốn xóa bài hát này?"
@@ -358,6 +345,7 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
                 position = (position until playlist_songs.size).random()
             }
         }
+        initFavoriteButtonView()
        playlist_songs_listView.smoothScrollToPosition(position)
         playlistDetailAdapter!!.selectedPosition = position
         playlistDetailAdapter!!.notifyItemChanged(position)
@@ -392,6 +380,7 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
                 position = (0..position).random()
             }
         }
+        initFavoriteButtonView()
         anim!!.start()
         musicService!!.stop()
         musicService!!.release()
@@ -482,7 +471,6 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         playBtnClick()
         backBtnClick()
         autoNext()
-        Log.d("rrrr1", "Yes")
         addSong()
     }
     private fun showDialog(){
@@ -496,32 +484,8 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         playlist_songs_listView.setHasFixedSize(false)
         playlistDetailAdapter!!.notifyItemRangeInserted(start, songs.size)
         playlist_songs_listView.setHasFixedSize(true)
-
-
-//        playlist_songs_listView.adapter!!.notifyItemInserted(lastSizeOfPlaylist)
-//        playlist_songs_listView.adapter!!.notifyItemRangeInserted(lastSizeOfPlaylist, songs.size)
-//        playlist_songs_listView.adapter!!.notifyDataSetChanged()
-        //Log.d("3333", playlist_songs_listView!!.get(playlist_songs.size-1).song_playlist_name.text.toString())
         musicService!!.musicFiles = playlist_songs
 
-
-//        if(playlist_songs.isNotEmpty()){
-//
-//            if(!isBound){
-//                bindMusicService()
-//
-////                  uri = Uri.parse(playlist_songs[0].path)
-////                  playlist_name_detail.text = playlist_songs[0].name
-////                  setImage(uri.toString())
-////                  musicService!!.createMediaPlayer(position)
-////                  playlist_playButton.setImageResource(R.drawable.stop)
-////                  musicService!!.start()
-//            }
-//            else {
-//                Log.d("AAAAA", "yes sir ${playlist_songs.size}")
-//                passDataToMusicService()
-//            }
-//        }
     }
     private fun showNotification(playPauseBtn: Int, playNoti: Int){
         var intent = Intent(this,PlaylistDetailAdapter::class.java)
@@ -622,6 +586,17 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         super.onPause()
 //        val intent = Intent(this,MainActivity::class.java)
 //        startActivityForResult(intent, 1)
+        if(playlistId!= (-1).toLong()) {
+            if(playlist_songs.size>0) {
+                MainActivity.musicPlayerDbHelper!!.deleteRelative(playlistId)
+                MainActivity.musicPlayerDbHelper!!.addRelative(playlistId, playlist_songs)
+            }
+            else {
+                MainActivity.musicPlayerDbHelper!!.deletePlaylist(playlistId)
+                MainActivity.musicPlayerDbHelper!!.deleteRelative(playlistId)
+            }
+        }
+        MainActivity.musicPlayerDbHelper!!.setAllFavorites(playlist_songs)
         if(isBound) {
             unbindService(this)
             isBound = false;

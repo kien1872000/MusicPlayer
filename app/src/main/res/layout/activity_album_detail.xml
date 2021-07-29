@@ -47,4 +47,9 @@
         android:layout_below="@id/album_name_detail"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:id="@+id/fragment_bottom_player_album_detail"/>
 </RelativeLayout>
