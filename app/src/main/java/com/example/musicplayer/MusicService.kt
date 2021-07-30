@@ -58,6 +58,9 @@ class MusicService : Service() {
                 ServiceCommunication.ACTION_PLAY-> {
                   //  Toast.makeText(this, "PlayPause", Toast.LENGTH_LONG).show()
                    actionPlaying?.playPause()
+                    if(actionPlaying!=null) {
+                        Log.d("EQQQ1", "yes")
+                    }
                    onPlaylistDetailClickListener?.playPause()
                    onMiniPlayerChangeListener?.playPause()
 
@@ -87,7 +90,6 @@ class MusicService : Service() {
         mediaPlayer?.release()
     }
     fun clickNext() {
-        Log.d("EQQQ1", sender.toString())
         if(sender!=null){
             when(sender) {
                 ServiceCommunication.PLAYLIST_DETAIL_ACTIVITY -> onPlaylistDetailClickListener?.playNext()

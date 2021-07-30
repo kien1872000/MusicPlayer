@@ -20,16 +20,6 @@ import kotlinx.android.synthetic.main.fragment_mini_player.*
 import kotlinx.android.synthetic.main.song.*
 
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [MiniPlayerFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class MiniPlayerFragment : Fragment(), ServiceConnection, OnMiniPlayerChangeListener{
     private var musicService: MusicService? = null;
     private var anim: ObjectAnimator? =null

@@ -80,14 +80,15 @@ class MainActivity : AppCompatActivity() {
         else{
             Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show()
             song_list = getAllMusic(this)
-            if(musicPlayerDbHelper!!.getAllSong().isNullOrEmpty()) {
-                musicPlayerDbHelper!!.insertSongs(song_list)
-            }
-            song_list = musicPlayerDbHelper!!.getAllSong()
             initView()
         }
     }
     private fun initView(){
+        Log.d("KKK", musicPlayerDbHelper!!.getAllSong().size.toString())
+        if(musicPlayerDbHelper!!.getAllSong().isNullOrEmpty()) {
+            musicPlayerDbHelper!!.insertSongs(song_list)
+        }
+        song_list = musicPlayerDbHelper!!.getAllSong()
         mainScreenFragment = MainScreenFragment()
         supportFragmentManager.beginTransaction()
             .setCustomAnimations(R.anim.animate_shrink_enter, R.anim.animate_shrink_exit)

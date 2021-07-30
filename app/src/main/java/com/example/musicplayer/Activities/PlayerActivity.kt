@@ -453,7 +453,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         musicService = myBinder.getService()
         musicService?.onPlaylistDetailClickListener = null
         musicService?.setCallBack(this)
-        Toast.makeText(this, "connected"+ musicService, Toast.LENGTH_LONG).show()
         musicService!!.setVolume(0.5f, 0.5f)
         totalTime = musicService!!.getDuration()
         positionBar.max = totalTime

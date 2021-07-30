@@ -544,7 +544,6 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         musicService?.actionPlaying =null;
         musicService?.setOnPlaylistDetailClick(this)
         startPlaylist()
-        Toast.makeText(this, "connected"+ musicService, Toast.LENGTH_LONG).show()
         autoNext()
 
     }
