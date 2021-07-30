@@ -18,7 +18,8 @@
         >
         <ImageView
             android:id="@+id/song_image"
-            android:src="@drawable/song_image"
+            android:src="@drawable/album_image"
+            android:scaleType="centerCrop"
             android:layout_width="70dp"
             android:layout_height="70dp"/>
     </androidx.cardview.widget.CardView>

@@ -42,7 +42,7 @@ class PlaylistAdapter(var context: Context?, var playlists: ArrayList<Playlist>)
 //        var image = getAlbumArt(albums[position].path)
 //        val bitmap = image?.size?.let { BitmapFactory.decodeByteArray(image, 0, it) }
         Glide.with(context!!).asBitmap()
-            .load(R.drawable.song_image)
+            .load(R.drawable.album_image)
             .into(viewHolder.playlist_image)
 
         viewHolder.itemView.setOnClickListener {

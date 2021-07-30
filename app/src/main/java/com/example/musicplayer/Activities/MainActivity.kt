@@ -10,6 +10,7 @@ import android.database.Cursor
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -51,7 +52,7 @@ class MainActivity : AppCompatActivity() {
                     var artists: String = cusor.getString(2)
                     var duration: String = cusor.getString(3)
                     var path: String = cusor.getString(4)
-                    var song: Song = Song(-1, title, album, path, artists, 0)
+                    var song: Song = Song(-1, title, album, path, artists, 0, 0)
                     tempMusicList.add(song)
                 }
                 cusor.close()
@@ -79,8 +80,10 @@ class MainActivity : AppCompatActivity() {
         else{
             Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show()
             song_list = getAllMusic(this)
+            if(musicPlayerDbHelper!!.getAllSong().isNullOrEmpty()) {
+                musicPlayerDbHelper!!.insertSongs(song_list)
+            }
             song_list = musicPlayerDbHelper!!.getAllSong()
-            //musicPlayerDbHelper!!.insertSongs(song_list)
             initView()
         }
     }
@@ -120,21 +123,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-//    override fun onResume() {
-//        super.onResume()
-//        var preferences: SharedPreferences =
-//        getSharedPreferences(MiniPlayer.LAST_PLAYED_SONG, Context.MODE_PRIVATE)
-//        var value = preferences.getString(MiniPlayer.MUSIC_FILE, null)
-//        Log.d("Hello mother fucker", value.toString())
-//        if(value!=null) {
-//            MiniPlayer.IS_SHOW_MINI_PLAYER = true;
-//            MiniPlayer.PATH_TO_FRAG = value.toString();
-//        }
-//        else {
-//            MiniPlayer.IS_SHOW_MINI_PLAYER = false;
-//            MiniPlayer.PATH_TO_FRAG = null;
-//        }
-//    }
+
 
 
 }

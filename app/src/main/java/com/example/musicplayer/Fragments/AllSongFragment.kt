@@ -3,6 +3,8 @@ package com.example.musicplayer.Fragments
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -13,7 +15,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayer.Adapters.SongAdapter
 import com.example.musicplayer.MiniPlayer
+import com.example.musicplayer.Models.Song
 import com.example.musicplayer.R
+import kotlinx.android.synthetic.main.fragment_all_song.*
 import com.example.musicplayer.Activities.MainActivity.Companion as MainActivity
 
 // TODO: Rename parameter arguments, choose names that match
@@ -30,6 +34,7 @@ class AllSongFragment : Fragment() {
     private var songAdapter: SongAdapter? = null
     private var all_song_recyclerView: RecyclerView? = null
     private var miniPlayer: MiniPlayerFragment? = null
+    private var musicItems = ArrayList<Song>()
     private var isStart = false
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -39,7 +44,8 @@ class AllSongFragment : Fragment() {
         all_song_recyclerView = rootView.findViewById(R.id.all_songs_listView)
         all_song_recyclerView?.setHasFixedSize(true)
         if(MainActivity.song_list.size>=1){
-            songAdapter = SongAdapter(activity!!,  MainActivity.song_list, "allSongs")
+            musicItems.addAll(MainActivity.song_list)
+            songAdapter = SongAdapter(activity!!,  musicItems, "allSongs", "allSong")
             var layoutManager: LinearLayoutManager = LinearLayoutManager(activity)
             layoutManager.orientation = LinearLayoutManager.VERTICAL
             all_song_recyclerView?.layoutManager = layoutManager
@@ -73,6 +79,7 @@ class AllSongFragment : Fragment() {
     }
     override fun onResume() {
         super.onResume()
+        onUserTyping()
         var preferences: SharedPreferences = activity!!.
         getSharedPreferences(MiniPlayer.LAST_PLAYED_SONG, Context.MODE_PRIVATE)
         val path = preferences.getString(MiniPlayer.MUSIC_FILE, null)
@@ -97,4 +104,32 @@ class AllSongFragment : Fragment() {
         }
 
     }
+    private fun onUserTyping() {
+        search_song.addTextChangedListener(object : TextWatcher {
+
+            override fun afterTextChanged(s: Editable) {}
+
+            override fun beforeTextChanged(s: CharSequence, start: Int,
+                                           count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence, start: Int,
+                                       before: Int, count: Int) {
+                val searchContent = s.toString().toLowerCase()
+                if(searchContent.isNullOrEmpty()) {
+                    musicItems.clear()
+                    musicItems.addAll(MainActivity.song_list)
+                }
+                else {
+                    musicItems.clear()
+                    for (song in MainActivity.song_list) {
+                        if(song.name.toLowerCase().contains(searchContent)) musicItems.add(song)
+                        songAdapter!!.notifyDataSetChanged()
+                    }
+                }
+
+            }
+        })
+    }
+
 }

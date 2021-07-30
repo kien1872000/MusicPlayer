@@ -15,15 +15,14 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.blogspot.atifsoftwares.animatoolib.Animatoo
 import com.bumptech.glide.Glide
-import com.example.musicplayer.Activities.MainActivity
 import com.example.musicplayer.Activities.PlayerActivity
 import com.example.musicplayer.Models.Song
 import com.example.musicplayer.R
 import maes.tech.intentanim.CustomIntent
 
 
-class SongAdapter(var context: Context?, var songs: ArrayList<Song>, var category_name: String, var type: String = "album") :
-    RecyclerView.Adapter<SongAdapter.ViewHolder>() {
+class FavoriteAdapter(var context: Context?, var songs: ArrayList<Song>, var category_name: String) :
+    RecyclerView.Adapter<FavoriteAdapter.ViewHolder>() {
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         var songName: TextView
         var songImage : ImageView
@@ -58,13 +57,9 @@ class SongAdapter(var context: Context?, var songs: ArrayList<Song>, var categor
         else  viewHolder.songImage.setImageBitmap(bitmap)
         viewHolder.itemView.setOnClickListener {
             val intent = Intent(context, PlayerActivity::class.java)
-            if(type=="allSong") {
-                intent.putExtra("position", getActualPosition(viewHolder.songName.text.toString()))
-            }
-            else {
-                intent.putExtra("position", position)
-            }
-            intent.putExtra("category", category_name)
+            intent.putExtra("position", position)
+            intent.putExtra("category", "favorite")
+            intent.putExtra("favoriteList", songs)
 //            viewHolder.itemView.context.startActivity(intent,
 //                ActivityOptions.makeCustomAnimation(viewHolder.itemView.context as Activity, R.anim.animate_spin_enter, R.anim.animate_spin_exit)
 //                    .toBundle())
@@ -72,13 +67,7 @@ class SongAdapter(var context: Context?, var songs: ArrayList<Song>, var categor
         }
     }
     override fun getItemCount() = songs.size
-    private fun getActualPosition(songName: String):Int {
-        for(i in 0 until MainActivity.song_list.size) {
-            val song = MainActivity.song_list[i]
-            if(songName==song.name) return i
-        }
-        return -1
-    }
+
     private fun getAlbumArt(uri: String): ByteArray? {
         val retriever = MediaMetadataRetriever()
         retriever.setDataSource(uri)

@@ -1,6 +1,7 @@
 package com.example.musicplayer.Adapters
 
 import android.content.Context
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -31,7 +32,9 @@ class CategoryAdapter(var context: Context?, var categories:ArrayList<Category>,
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.category_image.setImageResource(categories[position].image)
+        holder.category_image.setColorFilter(Color.parseColor("#eb5b5b"))
         holder.category_name_textview.text = categories[position].name
+
         holder.itemView.setOnClickListener{
             onClickCategoryItemListener?.onClickCategoryItem(position)
         }

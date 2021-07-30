@@ -1,5 +1,6 @@
 package com.example.musicplayer.Fragments
 
+import android.animation.ObjectAnimator
 import android.content.*
 import android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
 import android.graphics.BitmapFactory
@@ -9,6 +10,8 @@ import android.os.IBinder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.Animation
+import android.view.animation.LinearInterpolator
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.example.musicplayer.*
@@ -29,6 +32,7 @@ private const val ARG_PARAM2 = "param2"
  */
 class MiniPlayerFragment : Fragment(), ServiceConnection, OnMiniPlayerChangeListener{
     private var musicService: MusicService? = null;
+    private var anim: ObjectAnimator? =null
     private var isStart = true
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,6 +45,8 @@ class MiniPlayerFragment : Fragment(), ServiceConnection, OnMiniPlayerChangeList
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        stopRotateSongImage()
+        anim!!.start()
 //        Log.d("T111", MiniPlayer.PATH_TO_FRAG.toString())
 //        var preferences: SharedPreferences = activity!!.
 //        getSharedPreferences(MiniPlayer.LAST_PLAYED_SONG, Context.MODE_PRIVATE)
@@ -109,14 +115,16 @@ class MiniPlayerFragment : Fragment(), ServiceConnection, OnMiniPlayerChangeList
                     mini_player_image.setImageBitmap(bitmap)
                 }
                 else{
-                    mini_player_image.setImageResource(R.drawable.song_image)
+                    mini_player_image.setImageResource(R.drawable.album_image)
                 }
                 mini_player_song_name.text = MiniPlayer.SONG_NAME_TO_FRAG
                 mini_player_song_artist.text = MiniPlayer.SONG_ARTIST_TO_FRAG
                 if(MiniPlayer.PLAY_PAUSE == "Play") {
+                    anim!!.resume()
                     mini_player_play_btn.setImageResource(R.drawable.stop)
                 }
                 else {
+                    anim!!.pause()
                     mini_player_play_btn.setImageResource(R.drawable.play)
                 }
             }
@@ -132,7 +140,7 @@ class MiniPlayerFragment : Fragment(), ServiceConnection, OnMiniPlayerChangeList
         mini_player_prev_btn?.setOnClickListener {
             playPrevSelf()
         }
-        onClickBottomBar()
+//        onClickBottomBar()
     }
 //    private fun onClickPlayBtn() {
 //        if(musicService!!.isPlaying()) {
@@ -140,14 +148,14 @@ class MiniPlayerFragment : Fragment(), ServiceConnection, OnMiniPlayerChangeList
 //        }
 //    }
     private fun onMiniPlayerUpdate() {
-
+        anim!!.start()
         val image = getAlbumArt(MiniPlayer.PATH_TO_FRAG.toString())
         val bitmap = image?.size?.let { BitmapFactory.decodeByteArray(image, 0, it) }
         if(bitmap!=null){
             mini_player_image.setImageBitmap(bitmap)
         }
         else{
-            mini_player_image.setImageResource(R.drawable.song_image)
+            mini_player_image.setImageResource(R.drawable.album_image)
         }
         mini_player_song_name.text = MiniPlayer.SONG_NAME_TO_FRAG
         mini_player_song_artist.text = MiniPlayer.SONG_ARTIST_TO_FRAG
@@ -199,9 +207,11 @@ class MiniPlayerFragment : Fragment(), ServiceConnection, OnMiniPlayerChangeList
         if(musicService!=null) {
             //musicService!!.clickPlay()
             if(musicService!!.isPlaying()) {
+                anim!!.resume()
                 mini_player_play_btn.setImageResource(R.drawable.stop)
             }
             else {
+                anim!!.pause()
                 mini_player_play_btn.setImageResource(R.drawable.play)
             }
         }
@@ -228,11 +238,20 @@ class MiniPlayerFragment : Fragment(), ServiceConnection, OnMiniPlayerChangeList
             Toast.makeText(activity, "Pause1111", Toast.LENGTH_LONG).show()
             musicService!!.clickPlay()
             if(musicService!!.isPlaying()) {
+                anim!!.resume()
                 mini_player_play_btn.setImageResource(R.drawable.stop)
             }
             else {
+                anim!!.pause()
                 mini_player_play_btn.setImageResource(R.drawable.play)
             }
         }
+    }
+    private fun stopRotateSongImage() {
+        anim = ObjectAnimator.ofFloat(mini_player_image, "rotation", 0F, 360F)
+        anim!!.duration = 7500
+        anim!!.repeatCount = Animation.INFINITE
+        anim!!.interpolator = LinearInterpolator()
+        anim!!.repeatMode = ObjectAnimator.RESTART
     }
 }

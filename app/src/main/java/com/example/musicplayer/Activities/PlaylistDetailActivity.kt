@@ -118,7 +118,7 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         val image = getSongArt(uri.toString())
         val bitmap = image?.size?.let { BitmapFactory.decodeByteArray(image, 0, it) }
         if(bitmap==null){
-            playlist_image_detail.setImageResource(R.drawable.song_image)
+            playlist_image_detail.setImageResource(R.drawable.album_image)
         }
         else{
             playlist_image_detail.setImageBitmap(bitmap)
@@ -140,6 +140,7 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
         this.position = position
         showNotification(R.drawable.stop, R.drawable.ic_pause)
         initFavoriteButtonView()
+        playlist_songs[position].heardTimes++
         if(musicService!=null) {
             playlistDetailAdapter!!.notifyItemChanged(tempPosition)
             playlistDetailAdapter!!.selectedPosition = position
@@ -507,7 +508,7 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
             nBuilder.setSmallIcon(playPauseBtn).setLargeIcon(bitmap)
         }
         else{
-            var bitmapNone = BitmapFactory.decodeResource(resources, R.drawable.song_image)
+            var bitmapNone = BitmapFactory.decodeResource(resources, R.drawable.album_image)
             nBuilder.setSmallIcon(playPauseBtn).setLargeIcon(bitmapNone)
         }
 
@@ -596,7 +597,7 @@ class PlaylistDetailActivity : AppCompatActivity(), OnSongClick, OnAcceptClickLi
                 MainActivity.musicPlayerDbHelper!!.deleteRelative(playlistId)
             }
         }
-        MainActivity.musicPlayerDbHelper!!.setAllFavorites(playlist_songs)
+        MainActivity.musicPlayerDbHelper!!.setAllFavoritesAndHearTimes(playlist_songs)
         if(isBound) {
             unbindService(this)
             isBound = false;

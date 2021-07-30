@@ -1,14 +1,18 @@
 package com.example.musicplayer.Fragments
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.size
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -41,7 +45,7 @@ class PlaylistFragment : Fragment(), OnPlaylistItemChangeListener, OnCreatePlayl
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        add_playlist_button.setColorFilter(Color.WHITE)
         playlist_recyclerView= view.findViewById(R.id.all_songs_playlist)
         if(MainActivity.song_list.size>=1) {
             setPlaylistList()
@@ -53,9 +57,19 @@ class PlaylistFragment : Fragment(), OnPlaylistItemChangeListener, OnCreatePlayl
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun addButtonClick() {
-        add_playlist_button.setOnClickListener {
-            showDialog()
+        add_playlist_button.setOnTouchListener { v, event ->
+            when(event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    add_playlist_button.setColorFilter(Color.GRAY)
+                }
+                MotionEvent.ACTION_UP -> {
+                    add_playlist_button.setColorFilter(Color.WHITE)
+                    showDialog()
+                }
+            }
+            true
         }
     }
     private fun setPlaylistList(){

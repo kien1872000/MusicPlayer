@@ -20,7 +20,8 @@ class MusicPlayerDbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
                     "${Song.SongEntry.COLUMN_ALBUM} TEXT," +
                     "${Song.SongEntry.COLUMN_ARTIST} TEXT," +
                     "${Song.SongEntry.COLUMN_PATH} TEXT," +
-                    "${Song.SongEntry.COLUMN_IS_FAVORITE} INTEGER)"
+                    "${Song.SongEntry.COLUMN_IS_FAVORITE} INTEGER," +
+                    "${Song.SongEntry.COLUMN_HEARD_TIMES} INTEGER)"
 
         private const val SQL_CREATE_TABLE_PLAYLISTS =
             "CREATE TABLE ${Playlist.PlaylistEntry.TABLE_NAME} (" +
@@ -35,14 +36,14 @@ class MusicPlayerDbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
 
     }
     override fun onCreate(db: SQLiteDatabase) {
+        db.execSQL(SQL_CREATE_TABLE_SONGS)
         db.execSQL(SQL_CREATE_TABLE_PLAYLIST_SONG_RELATIVE)
         db.execSQL(SQL_CREATE_TABLE_PLAYLISTS)
-        db.execSQL(SQL_CREATE_TABLE_SONGS)
     }
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        db.execSQL(SQL_CREATE_TABLE_SONGS)
         db.execSQL(SQL_CREATE_TABLE_PLAYLIST_SONG_RELATIVE)
         db.execSQL(SQL_CREATE_TABLE_PLAYLISTS)
-        db.execSQL(SQL_CREATE_TABLE_SONGS)
         onCreate(db)
     }
     override fun onDowngrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -57,6 +58,7 @@ class MusicPlayerDbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
                 put(Song.SongEntry.COLUMN_NAME, song.name)
                 put(Song.SongEntry.COLUMN_PATH, song.path)
                 put(Song.SongEntry.COLUMN_IS_FAVORITE, song.isFavorite)
+                put(Song.SongEntry.COLUMN_HEARD_TIMES, song.heardTimes)
             }
             db?.insert(Song.SongEntry.TABLE_NAME, null, values)
         }
@@ -75,6 +77,7 @@ class MusicPlayerDbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
                     getString(getColumnIndexOrThrow(Song.SongEntry.COLUMN_PATH)),
                     getString(getColumnIndexOrThrow(Song.SongEntry.COLUMN_ARTIST)),
                     getInt(getColumnIndexOrThrow(Song.SongEntry.COLUMN_IS_FAVORITE)),
+                    getInt(getColumnIndexOrThrow(Song.SongEntry.COLUMN_HEARD_TIMES))
                 )
                 songs.add(song)
             }
@@ -128,7 +131,8 @@ class MusicPlayerDbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
         val path = Song.SongEntry.COLUMN_PATH
         val artist = Song.SongEntry.COLUMN_ARTIST
         val isFavorite = Song.SongEntry.COLUMN_IS_FAVORITE
-        val query = "SELECT S.$id, S.$name, S.$album, S.$path, S.$artist, S.$isFavorite FROM " +
+        val heardTimes = Song.SongEntry.COLUMN_HEARD_TIMES
+        val query = "SELECT S.$id, S.$name, S.$album, S.$path, S.$artist, S.$isFavorite, S.$heardTimes FROM " +
                 "${Playlist.PlaylistEntry.TABLE_NAME} as P " +
                 "INNER JOIN ${PlaylistSongRelative.PlaylistSongRelativeEntry.TABLE_NAME} as PR " +
                 "ON P.$id = PR.$plId " +
@@ -146,6 +150,7 @@ class MusicPlayerDbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
                     getString(getColumnIndexOrThrow(path)),
                     getString(getColumnIndexOrThrow(artist)),
                     getInt(getColumnIndexOrThrow(isFavorite)),
+                    getInt(getColumnIndexOrThrow(heardTimes))
                 )
                 songs.add(song)
             }
@@ -164,18 +169,70 @@ class MusicPlayerDbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
         val selectionArgs = arrayOf("$playlistId")
         db.delete(Playlist.PlaylistEntry.TABLE_NAME, selection, selectionArgs)
     }
-    fun setAllFavorites(songs: ArrayList<Song>) {
+    fun setAllFavoritesAndHearTimes(songs: ArrayList<Song>) {
         for(song in songs) {
-            setFavorite(song._id, song.isFavorite)
+            setFavoriteAndHearTimes(song._id, song.isFavorite, song.heardTimes)
         }
     }
-    fun setFavorite(songId: Long, isFavorite: Int) {
+    fun setFavoriteAndHearTimes(songId: Long, isFavorite: Int, heardTimes: Int) {
         val db = this.writableDatabase
         val values = ContentValues().apply {
             put(Song.SongEntry.COLUMN_IS_FAVORITE, isFavorite)
+            put(Song.SongEntry.COLUMN_HEARD_TIMES, heardTimes)
         }
         val selection = "${BaseColumns._ID} = ?"
         val selectionArgs = arrayOf("$songId")
         db.update(Song.SongEntry.TABLE_NAME, values, selection, selectionArgs)
+    }
+    fun getAllFavoriteSongs(): ArrayList<Song> {
+        val db = this.readableDatabase
+        val selection = "${Song.SongEntry.COLUMN_IS_FAVORITE} = ?"
+        val selectionArgs = arrayOf("1")
+        val cursor = db.query(Song.SongEntry.TABLE_NAME, null, selection, selectionArgs, null, null, null, null)
+        val songs = ArrayList<Song>()
+        with(cursor) {
+            while(moveToNext()) {
+                val song = Song(
+                    getLong(getColumnIndexOrThrow(BaseColumns._ID)),
+                    getString(getColumnIndexOrThrow(Song.SongEntry.COLUMN_NAME)),
+                    getString(getColumnIndexOrThrow(Song.SongEntry.COLUMN_ALBUM)),
+                    getString(getColumnIndexOrThrow(Song.SongEntry.COLUMN_PATH)),
+                    getString(getColumnIndexOrThrow(Song.SongEntry.COLUMN_ARTIST)),
+                    getInt(getColumnIndexOrThrow(Song.SongEntry.COLUMN_IS_FAVORITE)),
+                    getInt(getColumnIndexOrThrow(Song.SongEntry.COLUMN_HEARD_TIMES))
+                )
+                songs.add(song)
+            }
+        }
+        return songs
+    }
+    fun getTopHeardTimes(): ArrayList<Song> {
+        val db = this.readableDatabase
+        val sortOrder = "${Song.SongEntry.COLUMN_HEARD_TIMES} DESC"
+        val cursor = db.query(
+                        Song.SongEntry.TABLE_NAME,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        sortOrder,
+                        "5")
+        val songs = ArrayList<Song>()
+        with(cursor) {
+            while(moveToNext()) {
+                val song = Song(
+                    getLong(getColumnIndexOrThrow(BaseColumns._ID)),
+                    getString(getColumnIndexOrThrow(Song.SongEntry.COLUMN_NAME)),
+                    getString(getColumnIndexOrThrow(Song.SongEntry.COLUMN_ALBUM)),
+                    getString(getColumnIndexOrThrow(Song.SongEntry.COLUMN_PATH)),
+                    getString(getColumnIndexOrThrow(Song.SongEntry.COLUMN_ARTIST)),
+                    getInt(getColumnIndexOrThrow(Song.SongEntry.COLUMN_IS_FAVORITE)),
+                    getInt(getColumnIndexOrThrow(Song.SongEntry.COLUMN_HEARD_TIMES))
+                )
+                songs.add(song)
+            }
+        }
+        return songs
     }
 }

@@ -69,7 +69,7 @@ class PlaylistDetailAdapter(var context: Context?, var songs: ArrayList<Song>, v
        var image = getSongArt(songs[position].path)
        var bitmap = image?.size?.let { BitmapFactory.decodeByteArray(image, 0, it) }
        if(bitmap==null){
-           holder.song_image.setImageResource(R.drawable.song_image)
+           holder.song_image.setImageResource(R.drawable.album_image)
        }
        else{
            holder.song_image.setImageBitmap(bitmap)

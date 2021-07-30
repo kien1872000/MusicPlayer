@@ -10,6 +10,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.musicplayer.Activities.MainActivity
 import com.example.musicplayer.Activities.PlayerActivity
 import com.example.musicplayer.Models.Song
 import com.example.musicplayer.R
@@ -36,7 +37,7 @@ class RecentSongsAdapter(var context: Context?, var songs: ArrayList<Song>): Rec
         val bitmap = image?.size?.let { BitmapFactory.decodeByteArray(image, 0, it) }
         if(bitmap==null){
             Glide.with(context!!).asBitmap()
-                .load(R.drawable.song_image)
+                .load(R.drawable.album_image)
                 .into(holder.songImage)
         }
         else  holder.songImage.setImageBitmap(bitmap)
@@ -44,6 +45,7 @@ class RecentSongsAdapter(var context: Context?, var songs: ArrayList<Song>): Rec
             val intent = Intent(context, PlayerActivity::class.java)
             intent.putExtra("position", position)
             intent.putExtra("category", "recent")
+            intent.putExtra("recentList", songs)
             context?.startActivity(intent)
         }
     }

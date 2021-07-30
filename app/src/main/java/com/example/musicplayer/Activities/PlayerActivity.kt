@@ -86,6 +86,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     override fun onPause() {
         super.onPause()
         Log.d("VNNN", position.toString())
+        MainActivity.musicPlayerDbHelper!!.setAllFavoritesAndHearTimes(musicItems)
         unbindService(this)
 
     }
@@ -122,7 +123,13 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
                 musicItems = AlbumDetailActivity.songs
             }
             else if(category=="recent"){
-                musicItems = MainScreenFragment.recentSongList
+                musicItems = intent.getSerializableExtra("recentList") as ArrayList<Song>
+            }
+            else if(category=="listenALot"){
+                musicItems = intent.getSerializableExtra("listALotList") as ArrayList<Song>
+            }
+            else if(category=="favorite"){
+                musicItems = intent.getSerializableExtra("favoriteList") as ArrayList<Song>
             }
             else {
                 musicItems = MainActivity.song_list
@@ -130,6 +137,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         }
 
         if(position>=0) {
+            musicItems[position].heardTimes++
             initFavoriteButtonView()
             anim!!.start()
             uri = Uri.parse(musicItems[position].path)
@@ -350,6 +358,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
                 position = (0..position).random()
             }
         }
+        musicItems[position].heardTimes++
         initFavoriteButtonView()
         uri = Uri.parse(musicItems[position].path)
         val image = getAlbumArt(uri.toString())
@@ -358,7 +367,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
             song_image.setImageBitmap(bitmap)
         }
         else{
-            song_image.setImageResource(R.drawable.song_image)
+            song_image.setImageResource(R.drawable.album_image)
         }
         song_name_text.text = musicItems[position].name
         singer_name_text.text = musicItems[position].artist
@@ -387,6 +396,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
                 position = (position until musicItems.size).random()
             }
         }
+        musicItems[position].heardTimes++
         initFavoriteButtonView()
         uri = Uri.parse(musicItems[position].path)
         val image = getAlbumArt(uri.toString())
@@ -395,7 +405,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
             song_image.setImageBitmap(bitmap)
         }
         else{
-            song_image.setImageResource(R.drawable.song_image)
+            song_image.setImageResource(R.drawable.album_image)
         }
         song_name_text.text = musicItems[position].name
         singer_name_text.text = musicItems[position].artist
@@ -485,7 +495,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
             nBuilder.setSmallIcon(playPauseBtn).setLargeIcon(bitmap)
         }
         else{
-            var bitmapNone = BitmapFactory.decodeResource(resources, R.drawable.song_image)
+            var bitmapNone = BitmapFactory.decodeResource(resources, R.drawable.album_image)
             nBuilder.setSmallIcon(playPauseBtn).setLargeIcon(bitmapNone)
         }
 
@@ -560,6 +570,5 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         }
 
     }
-
 
 }

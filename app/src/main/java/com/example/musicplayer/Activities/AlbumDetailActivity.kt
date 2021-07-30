@@ -1,5 +1,6 @@
 package com.example.musicplayer.Activities
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.BitmapFactory
@@ -10,6 +11,7 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.MotionEvent
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayer.Adapters.SongAdapter
@@ -20,6 +22,7 @@ import com.example.musicplayer.Models.Song
 import com.example.musicplayer.OnSongClick
 import com.example.musicplayer.R
 import kotlinx.android.synthetic.main.activity_album_detail.*
+import kotlinx.android.synthetic.main.activity_player.*
 
 
 class AlbumDetailActivity : AppCompatActivity() {
@@ -69,6 +72,7 @@ class AlbumDetailActivity : AppCompatActivity() {
             MiniPlayer.SONG_ARTIST_TO_FRAG = null
             MiniPlayer.SONG_NAME_TO_FRAG = null
         }
+        backBtnClick()
     }
     private fun getIntentMethod(){
         position = intent.getIntExtra("position", -1)
@@ -79,6 +83,7 @@ class AlbumDetailActivity : AppCompatActivity() {
             album_image_detail.setImageBitmap(bitmap)
         }
         album_name_detail.text = AlbumFragment.album_list[position].name
+        songs.clear()
         for(songItem in MainActivity.song_list){
             if(songItem.album==AlbumFragment.album_list[position].name) songs.add(songItem)
         }
@@ -95,5 +100,25 @@ class AlbumDetailActivity : AppCompatActivity() {
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_bottom_player_album_detail, miniPlayer!!)
             .commit()
+    }
+    @SuppressLint("ClickableViewAccessibility")
+    private fun backBtnClick(){
+        album_detail_backButton.setOnTouchListener { arg0, arg1 ->
+            when (arg1.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    album_detail_backButton.setColorFilter(Color.parseColor("#a0acb2"))
+                }
+                MotionEvent.ACTION_CANCEL -> {
+                    album_detail_backButton.setColorFilter(Color.WHITE)
+                    this.onBackPressed()
+                }
+                MotionEvent.ACTION_UP -> {
+                    album_detail_backButton.setColorFilter(Color.WHITE)
+                    this.onBackPressed()
+
+                }
+            }
+            true
+        }
     }
 }
